@@ -3,3 +3,5 @@ To seek out new life and new civilizations
 change2
 c in c4
 c in b1
+c in vscode
+in vscode use git
