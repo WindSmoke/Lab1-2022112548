@@ -1,0 +1,7 @@
+Random walk traversal:
+Starting from node: and
+and -> shared -> the -> data -> wrote -> a -> detailed -> report -> and -> 
+Found a duplicate edge. Stopping the walk.
+
+Visited nodes: and -> shared -> the -> data -> wrote -> a -> detailed -> report -> and
+Visited edges: (a, detailed), (and, shared), (data, wrote), (detailed, report), (report, and), (shared, the), (the, data), (wrote, a)
