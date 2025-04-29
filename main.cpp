@@ -17,6 +17,8 @@
 //NOW i am make some changes
 //change in C4
 //change in B1
+//second change
+//change1
 using namespace std;
 
 // 全局图变量
