@@ -1,0 +1,5 @@
+if(EXISTS "C:/Users/windSmoke/Desktop/lab3/white/build/GraphAnalyzerTests[1]_tests.cmake")
+  include("C:/Users/windSmoke/Desktop/lab3/white/build/GraphAnalyzerTests[1]_tests.cmake")
+else()
+  add_test(GraphAnalyzerTests_NOT_BUILT GraphAnalyzerTests_NOT_BUILT)
+endif()

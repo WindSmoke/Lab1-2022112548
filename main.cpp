@@ -335,49 +335,34 @@ void randomWalk() {
         nodes_set.insert(pair.first);
     }
     vector<string> nodes(nodes_set.begin(), nodes_set.end());
-
     if (nodes.empty()) {
         cout << "The graph is empty, cannot perform random walk." << endl;
         return;
     }
-
-    // 使用当前时间作为随机种子
-    unsigned seed = static_cast<unsigned>(time(0));  // 获取当前时间的时间戳作为种子
-    mt19937 gen(seed);  // 使用当前时间作为随机数生成器的种子
+    unsigned seed = static_cast<unsigned>(time(0));  
+    mt19937 gen(seed);  
     uniform_int_distribution<> distrib_node(0, nodes.size() - 1);
     string current_node = nodes[distrib_node(gen)];
-
     vector<string> visited_nodes;
     set<pair<string, string>> visited_edges;
-
     ofstream f(output_file);
     if (f.is_open()) {
         f << "Random walk traversal:" << endl;
         f << "Starting from node: " << current_node << endl;
-
-        // 限制随机游走的步数，防止死循环
-        for (int i = 0; i < 1000000000000000000; ++i) { // 可以根据需要调整步数
+        for (int i = 0; i < 10000; ++i) {
             visited_nodes.push_back(current_node);
             f << current_node << " -> ";
-
-            // 检查当前节点是否有出边
             if (!graph.count(current_node) || graph.at(current_node).empty()) {
                 f << "\nNo outgoing edges from the current node. Stopping the walk." << endl;
                 break;
             }
-
-            // 获取当前节点的所有邻居
             vector<string> neighbors;
             for (const auto& neighbor_pair : graph.at(current_node)) {
                 neighbors.push_back(neighbor_pair.first);
             }
-
-            // 随机选择一个邻居节点作为下一个节点
             uniform_int_distribution<> distrib_neighbor(0, neighbors.size() - 1);
             string next_node = neighbors[distrib_neighbor(gen)];
             pair<string, string> edge = {current_node, next_node};
-
-            // 如果这个边已经访问过，停止随机游走
             if (visited_edges.count(edge)) {
                 f << "\nFound a duplicate edge. Stopping the walk." << endl;
                 break;
@@ -386,22 +371,17 @@ void randomWalk() {
                 current_node = next_node; // 移动到下一个节点
             }
         }
-
-        // 记录访问过的节点
         f << "\nVisited nodes: ";
         for (size_t i = 0; i < visited_nodes.size(); ++i) {
             f << visited_nodes[i] << (i == visited_nodes.size() - 1 ? "" : " -> ");
         }
         f << endl;
-
-        // 记录访问过的边
         f << "Visited edges: ";
         int count = 0;
         for (const auto& edge : visited_edges) {
             f << "(" << edge.first << ", " << edge.second << ")" << (++count == visited_edges.size() ? "" : ", ");
         }
         f << endl;
-
         cout << "Random walk completed. Traversal result has been written to " << output_file << endl;
         f.close();
     } else {
@@ -761,7 +741,7 @@ void extal_part(string text){
 
 
 int main(int argc, char* argv[]) {
-    string filepath = "1.txt";
+    string filepath = "Easy text.txt";
     if (argc > 1) {
         filepath = argv[1];
     }

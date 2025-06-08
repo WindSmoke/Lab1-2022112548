@@ -1,0 +1,138 @@
+Start testing: Jun 08 16:14 中国标准时间
+----------------------------------------------------------
+1/5 Testing: QueryBridgeWordsTest.Word1NotInGraph
+1/5 Test: QueryBridgeWordsTest.Word1NotInGraph
+Command: "C:/Users/windSmoke/Desktop/lab3/white/build/GraphAnalyzerTests.exe" "--gtest_filter=QueryBridgeWordsTest.Word1NotInGraph" "--gtest_also_run_disabled_tests"
+Directory: C:/Users/windSmoke/Desktop/lab3/white/build
+"QueryBridgeWordsTest.Word1NotInGraph" start time: Jun 08 16:14 中国标准时间
+Output:
+----------------------------------------------------------
+Note: Google Test filter = QueryBridgeWordsTest.Word1NotInGraph
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from QueryBridgeWordsTest
+[ RUN      ] QueryBridgeWordsTest.Word1NotInGraph
+No word1 in the graph!
+[       OK ] QueryBridgeWordsTest.Word1NotInGraph (1 ms)
+[----------] 1 test from QueryBridgeWordsTest (1 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (1 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"QueryBridgeWordsTest.Word1NotInGraph" end time: Jun 08 16:14 中国标准时间
+"QueryBridgeWordsTest.Word1NotInGraph" time elapsed: 00:00:00
+----------------------------------------------------------
+
+2/5 Testing: QueryBridgeWordsTest.Word2NotInGraph
+2/5 Test: QueryBridgeWordsTest.Word2NotInGraph
+Command: "C:/Users/windSmoke/Desktop/lab3/white/build/GraphAnalyzerTests.exe" "--gtest_filter=QueryBridgeWordsTest.Word2NotInGraph" "--gtest_also_run_disabled_tests"
+Directory: C:/Users/windSmoke/Desktop/lab3/white/build
+"QueryBridgeWordsTest.Word2NotInGraph" start time: Jun 08 16:14 中国标准时间
+Output:
+----------------------------------------------------------
+Note: Google Test filter = QueryBridgeWordsTest.Word2NotInGraph
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from QueryBridgeWordsTest
+[ RUN      ] QueryBridgeWordsTest.Word2NotInGraph
+No word1 in the graph!
+[       OK ] QueryBridgeWordsTest.Word2NotInGraph (1 ms)
+[----------] 1 test from QueryBridgeWordsTest (1 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (1 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"QueryBridgeWordsTest.Word2NotInGraph" end time: Jun 08 16:14 中国标准时间
+"QueryBridgeWordsTest.Word2NotInGraph" time elapsed: 00:00:00
+----------------------------------------------------------
+
+3/5 Testing: QueryBridgeWordsTest.NoBridgeWordsExist
+3/5 Test: QueryBridgeWordsTest.NoBridgeWordsExist
+Command: "C:/Users/windSmoke/Desktop/lab3/white/build/GraphAnalyzerTests.exe" "--gtest_filter=QueryBridgeWordsTest.NoBridgeWordsExist" "--gtest_also_run_disabled_tests"
+Directory: C:/Users/windSmoke/Desktop/lab3/white/build
+"QueryBridgeWordsTest.NoBridgeWordsExist" start time: Jun 08 16:14 中国标准时间
+Output:
+----------------------------------------------------------
+Note: Google Test filter = QueryBridgeWordsTest.NoBridgeWordsExist
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from QueryBridgeWordsTest
+[ RUN      ] QueryBridgeWordsTest.NoBridgeWordsExist
+No bridge words from city to jersey!
+[       OK ] QueryBridgeWordsTest.NoBridgeWordsExist (1 ms)
+[----------] 1 test from QueryBridgeWordsTest (1 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (2 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"QueryBridgeWordsTest.NoBridgeWordsExist" end time: Jun 08 16:14 中国标准时间
+"QueryBridgeWordsTest.NoBridgeWordsExist" time elapsed: 00:00:00
+----------------------------------------------------------
+
+4/5 Testing: QueryBridgeWordsTest.SingleBridgeWord
+4/5 Test: QueryBridgeWordsTest.SingleBridgeWord
+Command: "C:/Users/windSmoke/Desktop/lab3/white/build/GraphAnalyzerTests.exe" "--gtest_filter=QueryBridgeWordsTest.SingleBridgeWord" "--gtest_also_run_disabled_tests"
+Directory: C:/Users/windSmoke/Desktop/lab3/white/build
+"QueryBridgeWordsTest.SingleBridgeWord" start time: Jun 08 16:14 中国标准时间
+Output:
+----------------------------------------------------------
+Note: Google Test filter = QueryBridgeWordsTest.SingleBridgeWord
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from QueryBridgeWordsTest
+[ RUN      ] QueryBridgeWordsTest.SingleBridgeWord
+The bridge words from new to new are: jersey, york.
+[       OK ] QueryBridgeWordsTest.SingleBridgeWord (1 ms)
+[----------] 1 test from QueryBridgeWordsTest (1 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (1 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"QueryBridgeWordsTest.SingleBridgeWord" end time: Jun 08 16:14 中国标准时间
+"QueryBridgeWordsTest.SingleBridgeWord" time elapsed: 00:00:00
+----------------------------------------------------------
+
+5/5 Testing: QueryBridgeWordsMultipleTest.MultipleBridgeWords
+5/5 Test: QueryBridgeWordsMultipleTest.MultipleBridgeWords
+Command: "C:/Users/windSmoke/Desktop/lab3/white/build/GraphAnalyzerTests.exe" "--gtest_filter=QueryBridgeWordsMultipleTest.MultipleBridgeWords" "--gtest_also_run_disabled_tests"
+Directory: C:/Users/windSmoke/Desktop/lab3/white/build
+"QueryBridgeWordsMultipleTest.MultipleBridgeWords" start time: Jun 08 16:14 中国标准时间
+Output:
+----------------------------------------------------------
+Note: Google Test filter = QueryBridgeWordsMultipleTest.MultipleBridgeWords
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from QueryBridgeWordsMultipleTest
+[ RUN      ] QueryBridgeWordsMultipleTest.MultipleBridgeWords
+The bridge words from is to life are: good.
+[       OK ] QueryBridgeWordsMultipleTest.MultipleBridgeWords (1 ms)
+[----------] 1 test from QueryBridgeWordsMultipleTest (1 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (1 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"QueryBridgeWordsMultipleTest.MultipleBridgeWords" end time: Jun 08 16:14 中国标准时间
+"QueryBridgeWordsMultipleTest.MultipleBridgeWords" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Jun 08 16:14 中国标准时间

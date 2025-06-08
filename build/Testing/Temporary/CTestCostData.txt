@@ -1,0 +1,6 @@
+QueryBridgeWordsTest.Word1NotInGraph 1 0.0115466
+QueryBridgeWordsTest.Word2NotInGraph 1 0.0161706
+QueryBridgeWordsTest.NoBridgeWordsExist 1 0.0180598
+QueryBridgeWordsTest.SingleBridgeWord 1 0.0148382
+QueryBridgeWordsMultipleTest.MultipleBridgeWords 1 0.014427
+---

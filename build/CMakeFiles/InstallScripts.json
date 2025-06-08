@@ -1,0 +1,10 @@
+{
+	"InstallScripts" : 
+	[
+		"C:/Users/windSmoke/Desktop/lab3/white/build/cmake_install.cmake",
+		"C:/Users/windSmoke/Desktop/lab3/white/build/external/googletest/cmake_install.cmake",
+		"C:/Users/windSmoke/Desktop/lab3/white/build/external/googletest/googlemock/cmake_install.cmake",
+		"C:/Users/windSmoke/Desktop/lab3/white/build/external/googletest/googletest/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

@@ -1,0 +1,2957 @@
+        -:    0:Source:C:/mingw64/lib/gcc/x86_64-w64-mingw32/8.1.0/include/c++/type_traits
+        -:    0:Graph:.\graph_analyzer.cpp.gcno
+        -:    0:Data:.\graph_analyzer.cpp.gcda
+        -:    0:Runs:6
+        -:    0:Programs:1
+        -:    1:// C++11 <type_traits> -*- C++ -*-
+        -:    2:
+        -:    3:// Copyright (C) 2007-2018 Free Software Foundation, Inc.
+        -:    4://
+        -:    5:// This file is part of the GNU ISO C++ Library.  This library is free
+        -:    6:// software; you can redistribute it and/or modify it under the
+        -:    7:// terms of the GNU General Public License as published by the
+        -:    8:// Free Software Foundation; either version 3, or (at your option)
+        -:    9:// any later version.
+        -:   10:
+        -:   11:// This library is distributed in the hope that it will be useful,
+        -:   12:// but WITHOUT ANY WARRANTY; without even the implied warranty of
+        -:   13:// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        -:   14:// GNU General Public License for more details.
+        -:   15:
+        -:   16:// Under Section 7 of GPL version 3, you are granted additional
+        -:   17:// permissions described in the GCC Runtime Library Exception, version
+        -:   18:// 3.1, as published by the Free Software Foundation.
+        -:   19:
+        -:   20:// You should have received a copy of the GNU General Public License and
+        -:   21:// a copy of the GCC Runtime Library Exception along with this program;
+        -:   22:// see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
+        -:   23:// <http://www.gnu.org/licenses/>.
+        -:   24:
+        -:   25:/** @file include/type_traits
+        -:   26: *  This is a Standard C++ Library header.
+        -:   27: */
+        -:   28:
+        -:   29:#ifndef _GLIBCXX_TYPE_TRAITS
+        -:   30:#define _GLIBCXX_TYPE_TRAITS 1
+        -:   31:
+        -:   32:#pragma GCC system_header
+        -:   33:
+        -:   34:#if __cplusplus < 201103L
+        -:   35:# include <bits/c++0x_warning.h>
+        -:   36:#else
+        -:   37:
+        -:   38:#include <bits/c++config.h>
+        -:   39:
+        -:   40:#ifdef _GLIBCXX_USE_C99_STDINT_TR1
+        -:   41:# if defined (__UINT_LEAST16_TYPE__) && defined(__UINT_LEAST32_TYPE__)
+        -:   42:namespace std
+        -:   43:{
+        -:   44:  typedef __UINT_LEAST16_TYPE__ uint_least16_t;
+        -:   45:  typedef __UINT_LEAST32_TYPE__ uint_least32_t;
+        -:   46:}
+        -:   47:# else
+        -:   48:#  include <cstdint>
+        -:   49:# endif
+        -:   50:#endif
+        -:   51:
+        -:   52:namespace std _GLIBCXX_VISIBILITY(default)
+        -:   53:{
+        -:   54:_GLIBCXX_BEGIN_NAMESPACE_VERSION
+        -:   55:
+        -:   56:  /**
+        -:   57:   * @defgroup metaprogramming Metaprogramming
+        -:   58:   * @ingroup utilities
+        -:   59:   *
+        -:   60:   * Template utilities for compile-time introspection and modification,
+        -:   61:   * including type classification traits, type property inspection traits
+        -:   62:   * and type transformation traits.
+        -:   63:   *
+        -:   64:   * @{
+        -:   65:   */
+        -:   66:
+        -:   67:  /// integral_constant
+        -:   68:  template<typename _Tp, _Tp __v>
+        -:   69:    struct integral_constant
+        -:   70:    {
+        -:   71:      static constexpr _Tp                  value = __v;
+        -:   72:      typedef _Tp                           value_type;
+        -:   73:      typedef integral_constant<_Tp, __v>   type;
+    #####:   74:      constexpr operator value_type() const noexcept { return value; }
+        -:   75:#if __cplusplus > 201103L
+        -:   76:
+        -:   77:#define __cpp_lib_integral_constant_callable 201304
+        -:   78:
+        -:   79:      constexpr value_type operator()() const noexcept { return value; }
+        -:   80:#endif
+        -:   81:    };
+        -:   82:
+        -:   83:  template<typename _Tp, _Tp __v>
+        -:   84:    constexpr _Tp integral_constant<_Tp, __v>::value;
+        -:   85:
+        -:   86:  /// The type used as a compile-time boolean with true value.
+        -:   87:  typedef integral_constant<bool, true>     true_type;
+        -:   88:
+        -:   89:  /// The type used as a compile-time boolean with false value.
+        -:   90:  typedef integral_constant<bool, false>    false_type;
+        -:   91:
+        -:   92:  template<bool __v>
+        -:   93:    using __bool_constant = integral_constant<bool, __v>;
+        -:   94:
+        -:   95:#if __cplusplus > 201402L
+        -:   96:# define __cpp_lib_bool_constant 201505
+        -:   97:  template<bool __v>
+        -:   98:    using bool_constant = integral_constant<bool, __v>;
+        -:   99:#endif
+        -:  100:
+        -:  101:  // Meta programming helper types.
+        -:  102:
+        -:  103:  template<bool, typename, typename>
+        -:  104:    struct conditional;
+        -:  105:
+        -:  106:  template<typename...>
+        -:  107:    struct __or_;
+        -:  108:
+        -:  109:  template<>
+        -:  110:    struct __or_<>
+        -:  111:    : public false_type
+        -:  112:    { };
+        -:  113:
+        -:  114:  template<typename _B1>
+        -:  115:    struct __or_<_B1>
+        -:  116:    : public _B1
+        -:  117:    { };
+        -:  118:
+        -:  119:  template<typename _B1, typename _B2>
+        -:  120:    struct __or_<_B1, _B2>
+        -:  121:    : public conditional<_B1::value, _B1, _B2>::type
+        -:  122:    { };
+        -:  123:
+        -:  124:  template<typename _B1, typename _B2, typename _B3, typename... _Bn>
+        -:  125:    struct __or_<_B1, _B2, _B3, _Bn...>
+        -:  126:    : public conditional<_B1::value, _B1, __or_<_B2, _B3, _Bn...>>::type
+        -:  127:    { };
+        -:  128:
+        -:  129:  template<typename...>
+        -:  130:    struct __and_;
+        -:  131:
+        -:  132:  template<>
+        -:  133:    struct __and_<>
+        -:  134:    : public true_type
+        -:  135:    { };
+        -:  136:
+        -:  137:  template<typename _B1>
+        -:  138:    struct __and_<_B1>
+        -:  139:    : public _B1
+        -:  140:    { };
+        -:  141:
+        -:  142:  template<typename _B1, typename _B2>
+        -:  143:    struct __and_<_B1, _B2>
+        -:  144:    : public conditional<_B1::value, _B2, _B1>::type
+        -:  145:    { };
+        -:  146:
+        -:  147:  template<typename _B1, typename _B2, typename _B3, typename... _Bn>
+        -:  148:    struct __and_<_B1, _B2, _B3, _Bn...>
+        -:  149:    : public conditional<_B1::value, __and_<_B2, _B3, _Bn...>, _B1>::type
+        -:  150:    { };
+        -:  151:
+        -:  152:  template<typename _Pp>
+        -:  153:    struct __not_
+        -:  154:    : public __bool_constant<!bool(_Pp::value)>
+        -:  155:    { };
+        -:  156:
+        -:  157:#if __cplusplus >= 201703L
+        -:  158:
+        -:  159:#define __cpp_lib_logical_traits 201510
+        -:  160:
+        -:  161:  template<typename... _Bn>
+        -:  162:    struct conjunction
+        -:  163:    : __and_<_Bn...>
+        -:  164:    { };
+        -:  165:
+        -:  166:  template<typename... _Bn>
+        -:  167:    struct disjunction
+        -:  168:    : __or_<_Bn...>
+        -:  169:    { };
+        -:  170:
+        -:  171:  template<typename _Pp>
+        -:  172:    struct negation
+        -:  173:    : __not_<_Pp>
+        -:  174:    { };
+        -:  175:
+        -:  176:  template<typename... _Bn>
+        -:  177:    inline constexpr bool conjunction_v = conjunction<_Bn...>::value;
+        -:  178:
+        -:  179:  template<typename... _Bn>
+        -:  180:    inline constexpr bool disjunction_v = disjunction<_Bn...>::value;
+        -:  181:
+        -:  182:  template<typename _Pp>
+        -:  183:    inline constexpr bool negation_v = negation<_Pp>::value;
+        -:  184:
+        -:  185:#endif // C++17
+        -:  186:
+        -:  187:  // For several sfinae-friendly trait implementations we transport both the
+        -:  188:  // result information (as the member type) and the failure information (no
+        -:  189:  // member type). This is very similar to std::enable_if, but we cannot use
+        -:  190:  // them, because we need to derive from them as an implementation detail.
+        -:  191:
+        -:  192:  template<typename _Tp>
+        -:  193:    struct __success_type
+        -:  194:    { typedef _Tp type; };
+        -:  195:
+        -:  196:  struct __failure_type
+        -:  197:  { };
+        -:  198:
+        -:  199:  // Primary type categories.
+        -:  200:
+        -:  201:  template<typename>
+        -:  202:    struct remove_cv;
+        -:  203:
+        -:  204:  template<typename>
+        -:  205:    struct __is_void_helper
+        -:  206:    : public false_type { };
+        -:  207:
+        -:  208:  template<>
+        -:  209:    struct __is_void_helper<void>
+        -:  210:    : public true_type { };
+        -:  211:
+        -:  212:  /// is_void
+        -:  213:  template<typename _Tp>
+        -:  214:    struct is_void
+        -:  215:    : public __is_void_helper<typename remove_cv<_Tp>::type>::type
+        -:  216:    { };
+        -:  217:
+        -:  218:  template<typename>
+        -:  219:    struct __is_integral_helper
+        -:  220:    : public false_type { };
+        -:  221:
+        -:  222:  template<>
+        -:  223:    struct __is_integral_helper<bool>
+        -:  224:    : public true_type { };
+        -:  225:
+        -:  226:  template<>
+        -:  227:    struct __is_integral_helper<char>
+        -:  228:    : public true_type { };
+        -:  229:
+        -:  230:  template<>
+        -:  231:    struct __is_integral_helper<signed char>
+        -:  232:    : public true_type { };
+        -:  233:
+        -:  234:  template<>
+        -:  235:    struct __is_integral_helper<unsigned char>
+        -:  236:    : public true_type { };
+        -:  237:
+        -:  238:#ifdef _GLIBCXX_USE_WCHAR_T
+        -:  239:  template<>
+        -:  240:    struct __is_integral_helper<wchar_t>
+        -:  241:    : public true_type { };
+        -:  242:#endif
+        -:  243:
+        -:  244:  template<>
+        -:  245:    struct __is_integral_helper<char16_t>
+        -:  246:    : public true_type { };
+        -:  247:
+        -:  248:  template<>
+        -:  249:    struct __is_integral_helper<char32_t>
+        -:  250:    : public true_type { };
+        -:  251:
+        -:  252:  template<>
+        -:  253:    struct __is_integral_helper<short>
+        -:  254:    : public true_type { };
+        -:  255:
+        -:  256:  template<>
+        -:  257:    struct __is_integral_helper<unsigned short>
+        -:  258:    : public true_type { };
+        -:  259:
+        -:  260:  template<>
+        -:  261:    struct __is_integral_helper<int>
+        -:  262:    : public true_type { };
+        -:  263:
+        -:  264:  template<>
+        -:  265:    struct __is_integral_helper<unsigned int>
+        -:  266:    : public true_type { };
+        -:  267:
+        -:  268:  template<>
+        -:  269:    struct __is_integral_helper<long>
+        -:  270:    : public true_type { };
+        -:  271:
+        -:  272:  template<>
+        -:  273:    struct __is_integral_helper<unsigned long>
+        -:  274:    : public true_type { };
+        -:  275:
+        -:  276:  template<>
+        -:  277:    struct __is_integral_helper<long long>
+        -:  278:    : public true_type { };
+        -:  279:
+        -:  280:  template<>
+        -:  281:    struct __is_integral_helper<unsigned long long>
+        -:  282:    : public true_type { };
+        -:  283:
+        -:  284:  // Conditionalizing on __STRICT_ANSI__ here will break any port that
+        -:  285:  // uses one of these types for size_t.
+        -:  286:#if defined(__GLIBCXX_TYPE_INT_N_0)
+        -:  287:  template<>
+        -:  288:    struct __is_integral_helper<__GLIBCXX_TYPE_INT_N_0>
+        -:  289:    : public true_type { };
+        -:  290:
+        -:  291:  template<>
+        -:  292:    struct __is_integral_helper<unsigned __GLIBCXX_TYPE_INT_N_0>
+        -:  293:    : public true_type { };
+        -:  294:#endif
+        -:  295:#if defined(__GLIBCXX_TYPE_INT_N_1)
+        -:  296:  template<>
+        -:  297:    struct __is_integral_helper<__GLIBCXX_TYPE_INT_N_1>
+        -:  298:    : public true_type { };
+        -:  299:
+        -:  300:  template<>
+        -:  301:    struct __is_integral_helper<unsigned __GLIBCXX_TYPE_INT_N_1>
+        -:  302:    : public true_type { };
+        -:  303:#endif
+        -:  304:#if defined(__GLIBCXX_TYPE_INT_N_2)
+        -:  305:  template<>
+        -:  306:    struct __is_integral_helper<__GLIBCXX_TYPE_INT_N_2>
+        -:  307:    : public true_type { };
+        -:  308:
+        -:  309:  template<>
+        -:  310:    struct __is_integral_helper<unsigned __GLIBCXX_TYPE_INT_N_2>
+        -:  311:    : public true_type { };
+        -:  312:#endif
+        -:  313:#if defined(__GLIBCXX_TYPE_INT_N_3)
+        -:  314:  template<>
+        -:  315:    struct __is_integral_helper<__GLIBCXX_TYPE_INT_N_3>
+        -:  316:    : public true_type { };
+        -:  317:
+        -:  318:  template<>
+        -:  319:    struct __is_integral_helper<unsigned __GLIBCXX_TYPE_INT_N_3>
+        -:  320:    : public true_type { };
+        -:  321:#endif
+        -:  322:
+        -:  323:  /// is_integral
+        -:  324:  template<typename _Tp>
+        -:  325:    struct is_integral
+        -:  326:    : public __is_integral_helper<typename remove_cv<_Tp>::type>::type
+        -:  327:    { };
+        -:  328:
+        -:  329:  template<typename>
+        -:  330:    struct __is_floating_point_helper
+        -:  331:    : public false_type { };
+        -:  332:
+        -:  333:  template<>
+        -:  334:    struct __is_floating_point_helper<float>
+        -:  335:    : public true_type { };
+        -:  336:
+        -:  337:  template<>
+        -:  338:    struct __is_floating_point_helper<double>
+        -:  339:    : public true_type { };
+        -:  340:
+        -:  341:  template<>
+        -:  342:    struct __is_floating_point_helper<long double>
+        -:  343:    : public true_type { };
+        -:  344:
+        -:  345:#if !defined(__STRICT_ANSI__) && defined(_GLIBCXX_USE_FLOAT128)
+        -:  346:  template<>
+        -:  347:    struct __is_floating_point_helper<__float128>
+        -:  348:    : public true_type { };
+        -:  349:#endif
+        -:  350:
+        -:  351:  /// is_floating_point
+        -:  352:  template<typename _Tp>
+        -:  353:    struct is_floating_point
+        -:  354:    : public __is_floating_point_helper<typename remove_cv<_Tp>::type>::type
+        -:  355:    { };
+        -:  356:
+        -:  357:  /// is_array
+        -:  358:  template<typename>
+        -:  359:    struct is_array
+        -:  360:    : public false_type { };
+        -:  361:
+        -:  362:  template<typename _Tp, std::size_t _Size>
+        -:  363:    struct is_array<_Tp[_Size]>
+        -:  364:    : public true_type { };
+        -:  365:
+        -:  366:  template<typename _Tp>
+        -:  367:    struct is_array<_Tp[]>
+        -:  368:    : public true_type { };
+        -:  369:
+        -:  370:  template<typename>
+        -:  371:    struct __is_pointer_helper
+        -:  372:    : public false_type { };
+        -:  373:
+        -:  374:  template<typename _Tp>
+        -:  375:    struct __is_pointer_helper<_Tp*>
+        -:  376:    : public true_type { };
+        -:  377:
+        -:  378:  /// is_pointer
+        -:  379:  template<typename _Tp>
+        -:  380:    struct is_pointer
+        -:  381:    : public __is_pointer_helper<typename remove_cv<_Tp>::type>::type
+        -:  382:    { };
+        -:  383:
+        -:  384:  /// is_lvalue_reference
+        -:  385:  template<typename>
+        -:  386:    struct is_lvalue_reference
+        -:  387:    : public false_type { };
+        -:  388:
+        -:  389:  template<typename _Tp>
+        -:  390:    struct is_lvalue_reference<_Tp&>
+        -:  391:    : public true_type { };
+        -:  392:
+        -:  393:  /// is_rvalue_reference
+        -:  394:  template<typename>
+        -:  395:    struct is_rvalue_reference
+        -:  396:    : public false_type { };
+        -:  397:
+        -:  398:  template<typename _Tp>
+        -:  399:    struct is_rvalue_reference<_Tp&&>
+        -:  400:    : public true_type { };
+        -:  401:
+        -:  402:  template<typename>
+        -:  403:    struct is_function;
+        -:  404:
+        -:  405:  template<typename>
+        -:  406:    struct __is_member_object_pointer_helper
+        -:  407:    : public false_type { };
+        -:  408:
+        -:  409:  template<typename _Tp, typename _Cp>
+        -:  410:    struct __is_member_object_pointer_helper<_Tp _Cp::*>
+        -:  411:    : public integral_constant<bool, !is_function<_Tp>::value> { };
+        -:  412:
+        -:  413:  /// is_member_object_pointer
+        -:  414:  template<typename _Tp>
+        -:  415:    struct is_member_object_pointer
+        -:  416:    : public __is_member_object_pointer_helper<
+        -:  417:				typename remove_cv<_Tp>::type>::type
+        -:  418:    { };
+        -:  419:
+        -:  420:  template<typename>
+        -:  421:    struct __is_member_function_pointer_helper
+        -:  422:    : public false_type { };
+        -:  423:
+        -:  424:  template<typename _Tp, typename _Cp>
+        -:  425:    struct __is_member_function_pointer_helper<_Tp _Cp::*>
+        -:  426:    : public integral_constant<bool, is_function<_Tp>::value> { };
+        -:  427:
+        -:  428:  /// is_member_function_pointer
+        -:  429:  template<typename _Tp>
+        -:  430:    struct is_member_function_pointer
+        -:  431:    : public __is_member_function_pointer_helper<
+        -:  432:				typename remove_cv<_Tp>::type>::type
+        -:  433:    { };
+        -:  434:
+        -:  435:  /// is_enum
+        -:  436:  template<typename _Tp>
+        -:  437:    struct is_enum
+        -:  438:    : public integral_constant<bool, __is_enum(_Tp)>
+        -:  439:    { };
+        -:  440:
+        -:  441:  /// is_union
+        -:  442:  template<typename _Tp>
+        -:  443:    struct is_union
+        -:  444:    : public integral_constant<bool, __is_union(_Tp)>
+        -:  445:    { };
+        -:  446:
+        -:  447:  /// is_class
+        -:  448:  template<typename _Tp>
+        -:  449:    struct is_class
+        -:  450:    : public integral_constant<bool, __is_class(_Tp)>
+        -:  451:    { };
+        -:  452:
+        -:  453:  /// is_function
+        -:  454:  template<typename>
+        -:  455:    struct is_function
+        -:  456:    : public false_type { };
+        -:  457:
+        -:  458:  template<typename _Res, typename... _ArgTypes _GLIBCXX_NOEXCEPT_PARM>
+        -:  459:    struct is_function<_Res(_ArgTypes...) _GLIBCXX_NOEXCEPT_QUAL>
+        -:  460:    : public true_type { };
+        -:  461:
+        -:  462:  template<typename _Res, typename... _ArgTypes _GLIBCXX_NOEXCEPT_PARM>
+        -:  463:    struct is_function<_Res(_ArgTypes...) & _GLIBCXX_NOEXCEPT_QUAL>
+        -:  464:    : public true_type { };
+        -:  465:
+        -:  466:  template<typename _Res, typename... _ArgTypes _GLIBCXX_NOEXCEPT_PARM>
+        -:  467:    struct is_function<_Res(_ArgTypes...) && _GLIBCXX_NOEXCEPT_QUAL>
+        -:  468:    : public true_type { };
+        -:  469:
+        -:  470:  template<typename _Res, typename... _ArgTypes _GLIBCXX_NOEXCEPT_PARM>
+        -:  471:    struct is_function<_Res(_ArgTypes......) _GLIBCXX_NOEXCEPT_QUAL>
+        -:  472:    : public true_type { };
+        -:  473:
+        -:  474:  template<typename _Res, typename... _ArgTypes _GLIBCXX_NOEXCEPT_PARM>
+        -:  475:    struct is_function<_Res(_ArgTypes......) & _GLIBCXX_NOEXCEPT_QUAL>
+        -:  476:    : public true_type { };
+        -:  477:
+        -:  478:  template<typename _Res, typename... _ArgTypes _GLIBCXX_NOEXCEPT_PARM>
+        -:  479:    struct is_function<_Res(_ArgTypes......) && _GLIBCXX_NOEXCEPT_QUAL>
+        -:  480:    : public true_type { };
+        -:  481:
+        -:  482:  template<typename _Res, typename... _ArgTypes _GLIBCXX_NOEXCEPT_PARM>
+        -:  483:    struct is_function<_Res(_ArgTypes...) const _GLIBCXX_NOEXCEPT_QUAL>
+        -:  484:    : public true_type { };
+        -:  485:
+        -:  486:  template<typename _Res, typename... _ArgTypes _GLIBCXX_NOEXCEPT_PARM>
+        -:  487:    struct is_function<_Res(_ArgTypes...) const & _GLIBCXX_NOEXCEPT_QUAL>
+        -:  488:    : public true_type { };
+        -:  489:
+        -:  490:  template<typename _Res, typename... _ArgTypes _GLIBCXX_NOEXCEPT_PARM>
+        -:  491:    struct is_function<_Res(_ArgTypes...) const && _GLIBCXX_NOEXCEPT_QUAL>
+        -:  492:    : public true_type { };
+        -:  493:
+        -:  494:  template<typename _Res, typename... _ArgTypes _GLIBCXX_NOEXCEPT_PARM>
+        -:  495:    struct is_function<_Res(_ArgTypes......) const _GLIBCXX_NOEXCEPT_QUAL>
+        -:  496:    : public true_type { };
+        -:  497:
+        -:  498:  template<typename _Res, typename... _ArgTypes _GLIBCXX_NOEXCEPT_PARM>
+        -:  499:    struct is_function<_Res(_ArgTypes......) const & _GLIBCXX_NOEXCEPT_QUAL>
+        -:  500:    : public true_type { };
+        -:  501:
+        -:  502:  template<typename _Res, typename... _ArgTypes _GLIBCXX_NOEXCEPT_PARM>
+        -:  503:    struct is_function<_Res(_ArgTypes......) const && _GLIBCXX_NOEXCEPT_QUAL>
+        -:  504:    : public true_type { };
+        -:  505:
+        -:  506:  template<typename _Res, typename... _ArgTypes _GLIBCXX_NOEXCEPT_PARM>
+        -:  507:    struct is_function<_Res(_ArgTypes...) volatile _GLIBCXX_NOEXCEPT_QUAL>
+        -:  508:    : public true_type { };
+        -:  509:
+        -:  510:  template<typename _Res, typename... _ArgTypes _GLIBCXX_NOEXCEPT_PARM>
+        -:  511:    struct is_function<_Res(_ArgTypes...) volatile & _GLIBCXX_NOEXCEPT_QUAL>
+        -:  512:    : public true_type { };
+        -:  513:
+        -:  514:  template<typename _Res, typename... _ArgTypes _GLIBCXX_NOEXCEPT_PARM>
+        -:  515:    struct is_function<_Res(_ArgTypes...) volatile && _GLIBCXX_NOEXCEPT_QUAL>
+        -:  516:    : public true_type { };
+        -:  517:
+        -:  518:  template<typename _Res, typename... _ArgTypes _GLIBCXX_NOEXCEPT_PARM>
+        -:  519:    struct is_function<_Res(_ArgTypes......) volatile _GLIBCXX_NOEXCEPT_QUAL>
+        -:  520:    : public true_type { };
+        -:  521:
+        -:  522:  template<typename _Res, typename... _ArgTypes _GLIBCXX_NOEXCEPT_PARM>
+        -:  523:    struct is_function<_Res(_ArgTypes......) volatile & _GLIBCXX_NOEXCEPT_QUAL>
+        -:  524:    : public true_type { };
+        -:  525:
+        -:  526:  template<typename _Res, typename... _ArgTypes _GLIBCXX_NOEXCEPT_PARM>
+        -:  527:    struct is_function<_Res(_ArgTypes......) volatile && _GLIBCXX_NOEXCEPT_QUAL>
+        -:  528:    : public true_type { };
+        -:  529:
+        -:  530:  template<typename _Res, typename... _ArgTypes _GLIBCXX_NOEXCEPT_PARM>
+        -:  531:    struct is_function<_Res(_ArgTypes...) const volatile _GLIBCXX_NOEXCEPT_QUAL>
+        -:  532:    : public true_type { };
+        -:  533:
+        -:  534:  template<typename _Res, typename... _ArgTypes _GLIBCXX_NOEXCEPT_PARM>
+        -:  535:    struct is_function<_Res(_ArgTypes...) const volatile & _GLIBCXX_NOEXCEPT_QUAL>
+        -:  536:    : public true_type { };
+        -:  537:
+        -:  538:  template<typename _Res, typename... _ArgTypes _GLIBCXX_NOEXCEPT_PARM>
+        -:  539:    struct is_function<_Res(_ArgTypes...) const volatile && _GLIBCXX_NOEXCEPT_QUAL>
+        -:  540:    : public true_type { };
+        -:  541:
+        -:  542:  template<typename _Res, typename... _ArgTypes _GLIBCXX_NOEXCEPT_PARM>
+        -:  543:    struct is_function<_Res(_ArgTypes......) const volatile _GLIBCXX_NOEXCEPT_QUAL>
+        -:  544:    : public true_type { };
+        -:  545:
+        -:  546:  template<typename _Res, typename... _ArgTypes _GLIBCXX_NOEXCEPT_PARM>
+        -:  547:    struct is_function<_Res(_ArgTypes......) const volatile & _GLIBCXX_NOEXCEPT_QUAL>
+        -:  548:    : public true_type { };
+        -:  549:
+        -:  550:  template<typename _Res, typename... _ArgTypes _GLIBCXX_NOEXCEPT_PARM>
+        -:  551:    struct is_function<_Res(_ArgTypes......) const volatile && _GLIBCXX_NOEXCEPT_QUAL>
+        -:  552:    : public true_type { };
+        -:  553:
+        -:  554:#define __cpp_lib_is_null_pointer 201309
+        -:  555:
+        -:  556:  template<typename>
+        -:  557:    struct __is_null_pointer_helper
+        -:  558:    : public false_type { };
+        -:  559:
+        -:  560:  template<>
+        -:  561:    struct __is_null_pointer_helper<std::nullptr_t>
+        -:  562:    : public true_type { };
+        -:  563:
+        -:  564:  /// is_null_pointer (LWG 2247).
+        -:  565:  template<typename _Tp>
+        -:  566:    struct is_null_pointer
+        -:  567:    : public __is_null_pointer_helper<typename remove_cv<_Tp>::type>::type
+        -:  568:    { };
+        -:  569:
+        -:  570:  /// __is_nullptr_t (extension).
+        -:  571:  template<typename _Tp>
+        -:  572:    struct __is_nullptr_t
+        -:  573:    : public is_null_pointer<_Tp>
+        -:  574:    { };
+        -:  575:
+        -:  576:  // Composite type categories.
+        -:  577:
+        -:  578:  /// is_reference
+        -:  579:  template<typename _Tp>
+        -:  580:    struct is_reference
+        -:  581:    : public __or_<is_lvalue_reference<_Tp>,
+        -:  582:                   is_rvalue_reference<_Tp>>::type
+        -:  583:    { };
+        -:  584:
+        -:  585:  /// is_arithmetic
+        -:  586:  template<typename _Tp>
+        -:  587:    struct is_arithmetic
+        -:  588:    : public __or_<is_integral<_Tp>, is_floating_point<_Tp>>::type
+        -:  589:    { };
+        -:  590:
+        -:  591:  /// is_fundamental
+        -:  592:  template<typename _Tp>
+        -:  593:    struct is_fundamental
+        -:  594:    : public __or_<is_arithmetic<_Tp>, is_void<_Tp>,
+        -:  595:		   is_null_pointer<_Tp>>::type
+        -:  596:    { };
+        -:  597:
+        -:  598:  /// is_object
+        -:  599:  template<typename _Tp>
+        -:  600:    struct is_object
+        -:  601:    : public __not_<__or_<is_function<_Tp>, is_reference<_Tp>,
+        -:  602:                          is_void<_Tp>>>::type
+        -:  603:    { };
+        -:  604:
+        -:  605:  template<typename>
+        -:  606:    struct is_member_pointer;
+        -:  607:
+        -:  608:  /// is_scalar
+        -:  609:  template<typename _Tp>
+        -:  610:    struct is_scalar
+        -:  611:    : public __or_<is_arithmetic<_Tp>, is_enum<_Tp>, is_pointer<_Tp>,
+        -:  612:                   is_member_pointer<_Tp>, is_null_pointer<_Tp>>::type
+        -:  613:    { };
+        -:  614:
+        -:  615:  /// is_compound
+        -:  616:  template<typename _Tp>
+        -:  617:    struct is_compound
+        -:  618:    : public integral_constant<bool, !is_fundamental<_Tp>::value> { };
+        -:  619:
+        -:  620:  template<typename _Tp>
+        -:  621:    struct __is_member_pointer_helper
+        -:  622:    : public false_type { };
+        -:  623:
+        -:  624:  template<typename _Tp, typename _Cp>
+        -:  625:    struct __is_member_pointer_helper<_Tp _Cp::*>
+        -:  626:    : public true_type { };
+        -:  627:
+        -:  628:  /// is_member_pointer
+        -:  629:  template<typename _Tp>
+        -:  630:    struct is_member_pointer
+        -:  631:    : public __is_member_pointer_helper<typename remove_cv<_Tp>::type>::type
+        -:  632:    { };
+        -:  633:
+        -:  634:  // Utility to detect referenceable types ([defns.referenceable]).
+        -:  635:
+        -:  636:  template<typename _Tp>
+        -:  637:    struct __is_referenceable
+        -:  638:    : public __or_<is_object<_Tp>, is_reference<_Tp>>::type
+        -:  639:    { };
+        -:  640:
+        -:  641:  template<typename _Res, typename... _Args _GLIBCXX_NOEXCEPT_PARM>
+        -:  642:    struct __is_referenceable<_Res(_Args...) _GLIBCXX_NOEXCEPT_QUAL>
+        -:  643:    : public true_type
+        -:  644:    { };
+        -:  645:
+        -:  646:  template<typename _Res, typename... _Args _GLIBCXX_NOEXCEPT_PARM>
+        -:  647:    struct __is_referenceable<_Res(_Args......) _GLIBCXX_NOEXCEPT_QUAL>
+        -:  648:    : public true_type
+        -:  649:    { };
+        -:  650:
+        -:  651:  // Type properties.
+        -:  652:
+        -:  653:  /// is_const
+        -:  654:  template<typename>
+        -:  655:    struct is_const
+        -:  656:    : public false_type { };
+        -:  657:
+        -:  658:  template<typename _Tp>
+        -:  659:    struct is_const<_Tp const>
+        -:  660:    : public true_type { };
+        -:  661:
+        -:  662:  /// is_volatile
+        -:  663:  template<typename>
+        -:  664:    struct is_volatile
+        -:  665:    : public false_type { };
+        -:  666:
+        -:  667:  template<typename _Tp>
+        -:  668:    struct is_volatile<_Tp volatile>
+        -:  669:    : public true_type { };
+        -:  670:
+        -:  671:  /// is_trivial
+        -:  672:  template<typename _Tp>
+        -:  673:    struct is_trivial
+        -:  674:    : public integral_constant<bool, __is_trivial(_Tp)>
+        -:  675:    { };
+        -:  676:
+        -:  677:  // is_trivially_copyable
+        -:  678:  template<typename _Tp>
+        -:  679:    struct is_trivially_copyable
+        -:  680:    : public integral_constant<bool, __is_trivially_copyable(_Tp)>
+        -:  681:    { };
+        -:  682:
+        -:  683:  /// is_standard_layout
+        -:  684:  template<typename _Tp>
+        -:  685:    struct is_standard_layout
+        -:  686:    : public integral_constant<bool, __is_standard_layout(_Tp)>
+        -:  687:    { };
+        -:  688:
+        -:  689:  /// is_pod
+        -:  690:  // Could use is_standard_layout && is_trivial instead of the builtin.
+        -:  691:  template<typename _Tp>
+        -:  692:    struct is_pod
+        -:  693:    : public integral_constant<bool, __is_pod(_Tp)>
+        -:  694:    { };
+        -:  695:
+        -:  696:  /// is_literal_type
+        -:  697:  template<typename _Tp>
+        -:  698:    struct is_literal_type
+        -:  699:    : public integral_constant<bool, __is_literal_type(_Tp)>
+        -:  700:    { };
+        -:  701:
+        -:  702:  /// is_empty
+        -:  703:  template<typename _Tp>
+        -:  704:    struct is_empty
+        -:  705:    : public integral_constant<bool, __is_empty(_Tp)>
+        -:  706:    { };
+        -:  707:
+        -:  708:  /// is_polymorphic
+        -:  709:  template<typename _Tp>
+        -:  710:    struct is_polymorphic
+        -:  711:    : public integral_constant<bool, __is_polymorphic(_Tp)>
+        -:  712:    { };
+        -:  713:
+        -:  714:#if __cplusplus >= 201402L
+        -:  715:#define __cpp_lib_is_final 201402L
+        -:  716:  /// is_final
+        -:  717:  template<typename _Tp>
+        -:  718:    struct is_final
+        -:  719:    : public integral_constant<bool, __is_final(_Tp)>
+        -:  720:    { };
+        -:  721:#endif
+        -:  722:
+        -:  723:  /// is_abstract
+        -:  724:  template<typename _Tp>
+        -:  725:    struct is_abstract
+        -:  726:    : public integral_constant<bool, __is_abstract(_Tp)>
+        -:  727:    { };
+        -:  728:
+        -:  729:  template<typename _Tp,
+        -:  730:	   bool = is_arithmetic<_Tp>::value>
+        -:  731:    struct __is_signed_helper
+        -:  732:    : public false_type { };
+        -:  733:
+        -:  734:  template<typename _Tp>
+        -:  735:    struct __is_signed_helper<_Tp, true>
+        -:  736:    : public integral_constant<bool, _Tp(-1) < _Tp(0)>
+        -:  737:    { };
+        -:  738:
+        -:  739:  /// is_signed
+        -:  740:  template<typename _Tp>
+        -:  741:    struct is_signed
+        -:  742:    : public __is_signed_helper<_Tp>::type
+        -:  743:    { };
+        -:  744:
+        -:  745:  /// is_unsigned
+        -:  746:  template<typename _Tp>
+        -:  747:    struct is_unsigned
+        -:  748:    : public __and_<is_arithmetic<_Tp>, __not_<is_signed<_Tp>>>
+        -:  749:    { };
+        -:  750:
+        -:  751:
+        -:  752:  // Destructible and constructible type properties.
+        -:  753:
+        -:  754:  /**
+        -:  755:   *  @brief  Utility to simplify expressions used in unevaluated operands
+        -:  756:   *  @ingroup utilities
+        -:  757:   */
+        -:  758:
+        -:  759:  template<typename _Tp, typename _Up = _Tp&&>
+        -:  760:    _Up
+        -:  761:    __declval(int);
+        -:  762:
+        -:  763:  template<typename _Tp>
+        -:  764:    _Tp
+        -:  765:    __declval(long);
+        -:  766:
+        -:  767:  template<typename _Tp>
+        -:  768:    auto declval() noexcept -> decltype(__declval<_Tp>(0));
+        -:  769:
+        -:  770:  template<typename, unsigned = 0>
+        -:  771:    struct extent;
+        -:  772:
+        -:  773:  template<typename>
+        -:  774:    struct remove_all_extents;
+        -:  775:
+        -:  776:  template<typename _Tp>
+        -:  777:    struct __is_array_known_bounds
+        -:  778:    : public integral_constant<bool, (extent<_Tp>::value > 0)>
+        -:  779:    { };
+        -:  780:
+        -:  781:  template<typename _Tp>
+        -:  782:    struct __is_array_unknown_bounds
+        -:  783:    : public __and_<is_array<_Tp>, __not_<extent<_Tp>>>
+        -:  784:    { };
+        -:  785:
+        -:  786:  // In N3290 is_destructible does not say anything about function
+        -:  787:  // types and abstract types, see LWG 2049. This implementation
+        -:  788:  // describes function types as non-destructible and all complete
+        -:  789:  // object types as destructible, iff the explicit destructor
+        -:  790:  // call expression is wellformed.
+        -:  791:  struct __do_is_destructible_impl
+        -:  792:  {
+        -:  793:    template<typename _Tp, typename = decltype(declval<_Tp&>().~_Tp())>
+        -:  794:      static true_type __test(int);
+        -:  795:
+        -:  796:    template<typename>
+        -:  797:      static false_type __test(...);
+        -:  798:  };
+        -:  799:
+        -:  800:  template<typename _Tp>
+        -:  801:    struct __is_destructible_impl
+        -:  802:    : public __do_is_destructible_impl
+        -:  803:    {
+        -:  804:      typedef decltype(__test<_Tp>(0)) type;
+        -:  805:    };
+        -:  806:
+        -:  807:  template<typename _Tp,
+        -:  808:           bool = __or_<is_void<_Tp>,
+        -:  809:                        __is_array_unknown_bounds<_Tp>,
+        -:  810:                        is_function<_Tp>>::value,
+        -:  811:           bool = __or_<is_reference<_Tp>, is_scalar<_Tp>>::value>
+        -:  812:    struct __is_destructible_safe;
+        -:  813:
+        -:  814:  template<typename _Tp>
+        -:  815:    struct __is_destructible_safe<_Tp, false, false>
+        -:  816:    : public __is_destructible_impl<typename
+        -:  817:               remove_all_extents<_Tp>::type>::type
+        -:  818:    { };
+        -:  819:
+        -:  820:  template<typename _Tp>
+        -:  821:    struct __is_destructible_safe<_Tp, true, false>
+        -:  822:    : public false_type { };
+        -:  823:
+        -:  824:  template<typename _Tp>
+        -:  825:    struct __is_destructible_safe<_Tp, false, true>
+        -:  826:    : public true_type { };
+        -:  827:
+        -:  828:  /// is_destructible
+        -:  829:  template<typename _Tp>
+        -:  830:    struct is_destructible
+        -:  831:    : public __is_destructible_safe<_Tp>::type
+        -:  832:    { };
+        -:  833:
+        -:  834:  // is_nothrow_destructible requires that is_destructible is
+        -:  835:  // satisfied as well.  We realize that by mimicing the
+        -:  836:  // implementation of is_destructible but refer to noexcept(expr)
+        -:  837:  // instead of decltype(expr).
+        -:  838:  struct __do_is_nt_destructible_impl
+        -:  839:  {
+        -:  840:    template<typename _Tp>
+        -:  841:      static integral_constant<bool, noexcept(declval<_Tp&>().~_Tp())>
+        -:  842:        __test(int);
+        -:  843:
+        -:  844:    template<typename>
+        -:  845:      static false_type __test(...);
+        -:  846:  };
+        -:  847:
+        -:  848:  template<typename _Tp>
+        -:  849:    struct __is_nt_destructible_impl
+        -:  850:    : public __do_is_nt_destructible_impl
+        -:  851:    {
+        -:  852:      typedef decltype(__test<_Tp>(0)) type;
+        -:  853:    };
+        -:  854:
+        -:  855:  template<typename _Tp,
+        -:  856:           bool = __or_<is_void<_Tp>,
+        -:  857:                        __is_array_unknown_bounds<_Tp>,
+        -:  858:                        is_function<_Tp>>::value,
+        -:  859:           bool = __or_<is_reference<_Tp>, is_scalar<_Tp>>::value>
+        -:  860:    struct __is_nt_destructible_safe;
+        -:  861:
+        -:  862:  template<typename _Tp>
+        -:  863:    struct __is_nt_destructible_safe<_Tp, false, false>
+        -:  864:    : public __is_nt_destructible_impl<typename
+        -:  865:               remove_all_extents<_Tp>::type>::type
+        -:  866:    { };
+        -:  867:
+        -:  868:  template<typename _Tp>
+        -:  869:    struct __is_nt_destructible_safe<_Tp, true, false>
+        -:  870:    : public false_type { };
+        -:  871:
+        -:  872:  template<typename _Tp>
+        -:  873:    struct __is_nt_destructible_safe<_Tp, false, true>
+        -:  874:    : public true_type { };
+        -:  875:
+        -:  876:  /// is_nothrow_destructible
+        -:  877:  template<typename _Tp>
+        -:  878:    struct is_nothrow_destructible
+        -:  879:    : public __is_nt_destructible_safe<_Tp>::type
+        -:  880:    { };
+        -:  881:
+        -:  882:  struct __do_is_default_constructible_impl
+        -:  883:  {
+        -:  884:    template<typename _Tp, typename = decltype(_Tp())>
+        -:  885:      static true_type __test(int);
+        -:  886:
+        -:  887:    template<typename>
+        -:  888:      static false_type __test(...);
+        -:  889:  };
+        -:  890:
+        -:  891:  template<typename _Tp>
+        -:  892:    struct __is_default_constructible_impl
+        -:  893:    : public __do_is_default_constructible_impl
+        -:  894:    {
+        -:  895:      typedef decltype(__test<_Tp>(0)) type;
+        -:  896:    };
+        -:  897:
+        -:  898:  template<typename _Tp>
+        -:  899:    struct __is_default_constructible_atom
+        -:  900:    : public __and_<__not_<is_void<_Tp>>,
+        -:  901:                    __is_default_constructible_impl<_Tp>>
+        -:  902:    { };
+        -:  903:
+        -:  904:  template<typename _Tp, bool = is_array<_Tp>::value>
+        -:  905:    struct __is_default_constructible_safe;
+        -:  906:
+        -:  907:  // The following technique is a workaround for a current core language
+        -:  908:  // restriction, which does not allow for array types to occur in
+        -:  909:  // functional casts of the form T().  Complete arrays can be default-
+        -:  910:  // constructed, if the element type is default-constructible, but
+        -:  911:  // arrays with unknown bounds are not.
+        -:  912:  template<typename _Tp>
+        -:  913:    struct __is_default_constructible_safe<_Tp, true>
+        -:  914:    : public __and_<__is_array_known_bounds<_Tp>,
+        -:  915:		    __is_default_constructible_atom<typename
+        -:  916:                      remove_all_extents<_Tp>::type>>
+        -:  917:    { };
+        -:  918:
+        -:  919:  template<typename _Tp>
+        -:  920:    struct __is_default_constructible_safe<_Tp, false>
+        -:  921:    : public __is_default_constructible_atom<_Tp>::type
+        -:  922:    { };
+        -:  923:
+        -:  924:  /// is_default_constructible
+        -:  925:  template<typename _Tp>
+        -:  926:    struct is_default_constructible
+        -:  927:    : public __is_default_constructible_safe<_Tp>::type
+        -:  928:    { };
+        -:  929:
+        -:  930:  /// is_constructible
+        -:  931:  template<typename _Tp, typename... _Args>
+        -:  932:    struct is_constructible
+        -:  933:      : public __bool_constant<__is_constructible(_Tp, _Args...)>
+        -:  934:    { };
+        -:  935:
+        -:  936:  template<typename _Tp, bool = __is_referenceable<_Tp>::value>
+        -:  937:    struct __is_copy_constructible_impl;
+        -:  938:
+        -:  939:  template<typename _Tp>
+        -:  940:    struct __is_copy_constructible_impl<_Tp, false>
+        -:  941:    : public false_type { };
+        -:  942:
+        -:  943:  template<typename _Tp>
+        -:  944:    struct __is_copy_constructible_impl<_Tp, true>
+        -:  945:    : public is_constructible<_Tp, const _Tp&>
+        -:  946:    { };
+        -:  947:
+        -:  948:  /// is_copy_constructible
+        -:  949:  template<typename _Tp>
+        -:  950:    struct is_copy_constructible
+        -:  951:    : public __is_copy_constructible_impl<_Tp>
+        -:  952:    { };
+        -:  953:
+        -:  954:  template<typename _Tp, bool = __is_referenceable<_Tp>::value>
+        -:  955:    struct __is_move_constructible_impl;
+        -:  956:
+        -:  957:  template<typename _Tp>
+        -:  958:    struct __is_move_constructible_impl<_Tp, false>
+        -:  959:    : public false_type { };
+        -:  960:
+        -:  961:  template<typename _Tp>
+        -:  962:    struct __is_move_constructible_impl<_Tp, true>
+        -:  963:    : public is_constructible<_Tp, _Tp&&>
+        -:  964:    { };
+        -:  965:
+        -:  966:  /// is_move_constructible
+        -:  967:  template<typename _Tp>
+        -:  968:    struct is_move_constructible
+        -:  969:    : public __is_move_constructible_impl<_Tp>
+        -:  970:    { };
+        -:  971:
+        -:  972:  template<typename _Tp>
+        -:  973:    struct __is_nt_default_constructible_atom
+        -:  974:    : public integral_constant<bool, noexcept(_Tp())>
+        -:  975:    { };
+        -:  976:
+        -:  977:  template<typename _Tp, bool = is_array<_Tp>::value>
+        -:  978:    struct __is_nt_default_constructible_impl;
+        -:  979:
+        -:  980:  template<typename _Tp>
+        -:  981:    struct __is_nt_default_constructible_impl<_Tp, true>
+        -:  982:    : public __and_<__is_array_known_bounds<_Tp>,
+        -:  983:		    __is_nt_default_constructible_atom<typename
+        -:  984:                      remove_all_extents<_Tp>::type>>
+        -:  985:    { };
+        -:  986:
+        -:  987:  template<typename _Tp>
+        -:  988:    struct __is_nt_default_constructible_impl<_Tp, false>
+        -:  989:    : public __is_nt_default_constructible_atom<_Tp>
+        -:  990:    { };
+        -:  991:
+        -:  992:  /// is_nothrow_default_constructible
+        -:  993:  template<typename _Tp>
+        -:  994:    struct is_nothrow_default_constructible
+        -:  995:    : public __and_<is_default_constructible<_Tp>,
+        -:  996:                    __is_nt_default_constructible_impl<_Tp>>
+        -:  997:    { };
+        -:  998:
+        -:  999:  template<typename _Tp, typename... _Args>
+        -: 1000:    struct __is_nt_constructible_impl
+        -: 1001:    : public integral_constant<bool, noexcept(_Tp(declval<_Args>()...))>
+        -: 1002:    { };
+        -: 1003:
+        -: 1004:  template<typename _Tp, typename _Arg>
+        -: 1005:    struct __is_nt_constructible_impl<_Tp, _Arg>
+        -: 1006:    : public integral_constant<bool,
+        -: 1007:                               noexcept(static_cast<_Tp>(declval<_Arg>()))>
+        -: 1008:    { };
+        -: 1009:
+        -: 1010:  template<typename _Tp>
+        -: 1011:    struct __is_nt_constructible_impl<_Tp>
+        -: 1012:    : public is_nothrow_default_constructible<_Tp>
+        -: 1013:    { };
+        -: 1014:
+        -: 1015:  /// is_nothrow_constructible
+        -: 1016:  template<typename _Tp, typename... _Args>
+        -: 1017:    struct is_nothrow_constructible
+        -: 1018:    : public __and_<is_constructible<_Tp, _Args...>,
+        -: 1019:		    __is_nt_constructible_impl<_Tp, _Args...>>
+        -: 1020:    { };
+        -: 1021:
+        -: 1022:  template<typename _Tp, bool = __is_referenceable<_Tp>::value>
+        -: 1023:    struct __is_nothrow_copy_constructible_impl;
+        -: 1024:
+        -: 1025:  template<typename _Tp>
+        -: 1026:    struct __is_nothrow_copy_constructible_impl<_Tp, false>
+        -: 1027:    : public false_type { };
+        -: 1028:
+        -: 1029:  template<typename _Tp>
+        -: 1030:    struct __is_nothrow_copy_constructible_impl<_Tp, true>
+        -: 1031:    : public is_nothrow_constructible<_Tp, const _Tp&>
+        -: 1032:    { };
+        -: 1033:
+        -: 1034:  /// is_nothrow_copy_constructible
+        -: 1035:  template<typename _Tp>
+        -: 1036:    struct is_nothrow_copy_constructible
+        -: 1037:    : public __is_nothrow_copy_constructible_impl<_Tp>
+        -: 1038:    { };
+        -: 1039:
+        -: 1040:  template<typename _Tp, bool = __is_referenceable<_Tp>::value>
+        -: 1041:    struct __is_nothrow_move_constructible_impl;
+        -: 1042:
+        -: 1043:  template<typename _Tp>
+        -: 1044:    struct __is_nothrow_move_constructible_impl<_Tp, false>
+        -: 1045:    : public false_type { };
+        -: 1046:
+        -: 1047:  template<typename _Tp>
+        -: 1048:    struct __is_nothrow_move_constructible_impl<_Tp, true>
+        -: 1049:    : public is_nothrow_constructible<_Tp, _Tp&&>
+        -: 1050:    { };
+        -: 1051:
+        -: 1052:  /// is_nothrow_move_constructible
+        -: 1053:  template<typename _Tp>
+        -: 1054:    struct is_nothrow_move_constructible
+        -: 1055:    : public __is_nothrow_move_constructible_impl<_Tp>
+        -: 1056:    { };
+        -: 1057:
+        -: 1058:  /// is_assignable
+        -: 1059:  template<typename _Tp, typename _Up>
+        -: 1060:    struct is_assignable
+        -: 1061:      : public __bool_constant<__is_assignable(_Tp, _Up)>
+        -: 1062:    { };
+        -: 1063:
+        -: 1064:  template<typename _Tp, bool = __is_referenceable<_Tp>::value>
+        -: 1065:    struct __is_copy_assignable_impl;
+        -: 1066:
+        -: 1067:  template<typename _Tp>
+        -: 1068:    struct __is_copy_assignable_impl<_Tp, false>
+        -: 1069:    : public false_type { };
+        -: 1070:
+        -: 1071:  template<typename _Tp>
+        -: 1072:    struct __is_copy_assignable_impl<_Tp, true>
+        -: 1073:    : public is_assignable<_Tp&, const _Tp&>
+        -: 1074:    { };
+        -: 1075:
+        -: 1076:  /// is_copy_assignable
+        -: 1077:  template<typename _Tp>
+        -: 1078:    struct is_copy_assignable
+        -: 1079:    : public __is_copy_assignable_impl<_Tp>
+        -: 1080:    { };
+        -: 1081:
+        -: 1082:  template<typename _Tp, bool = __is_referenceable<_Tp>::value>
+        -: 1083:    struct __is_move_assignable_impl;
+        -: 1084:
+        -: 1085:  template<typename _Tp>
+        -: 1086:    struct __is_move_assignable_impl<_Tp, false>
+        -: 1087:    : public false_type { };
+        -: 1088:
+        -: 1089:  template<typename _Tp>
+        -: 1090:    struct __is_move_assignable_impl<_Tp, true>
+        -: 1091:    : public is_assignable<_Tp&, _Tp&&>
+        -: 1092:    { };
+        -: 1093:
+        -: 1094:  /// is_move_assignable
+        -: 1095:  template<typename _Tp>
+        -: 1096:    struct is_move_assignable
+        -: 1097:    : public __is_move_assignable_impl<_Tp>
+        -: 1098:    { };
+        -: 1099:
+        -: 1100:  template<typename _Tp, typename _Up>
+        -: 1101:    struct __is_nt_assignable_impl
+        -: 1102:    : public integral_constant<bool, noexcept(declval<_Tp>() = declval<_Up>())>
+        -: 1103:    { };
+        -: 1104:
+        -: 1105:  /// is_nothrow_assignable
+        -: 1106:  template<typename _Tp, typename _Up>
+        -: 1107:    struct is_nothrow_assignable
+        -: 1108:    : public __and_<is_assignable<_Tp, _Up>,
+        -: 1109:		    __is_nt_assignable_impl<_Tp, _Up>>
+        -: 1110:    { };
+        -: 1111:
+        -: 1112:  template<typename _Tp, bool = __is_referenceable<_Tp>::value>
+        -: 1113:    struct __is_nt_copy_assignable_impl;
+        -: 1114:
+        -: 1115:  template<typename _Tp>
+        -: 1116:    struct __is_nt_copy_assignable_impl<_Tp, false>
+        -: 1117:    : public false_type { };
+        -: 1118:
+        -: 1119:  template<typename _Tp>
+        -: 1120:    struct __is_nt_copy_assignable_impl<_Tp, true>
+        -: 1121:    : public is_nothrow_assignable<_Tp&, const _Tp&>
+        -: 1122:    { };
+        -: 1123:
+        -: 1124:  /// is_nothrow_copy_assignable
+        -: 1125:  template<typename _Tp>
+        -: 1126:    struct is_nothrow_copy_assignable
+        -: 1127:    : public __is_nt_copy_assignable_impl<_Tp>
+        -: 1128:    { };
+        -: 1129:
+        -: 1130:  template<typename _Tp, bool = __is_referenceable<_Tp>::value>
+        -: 1131:    struct __is_nt_move_assignable_impl;
+        -: 1132:
+        -: 1133:  template<typename _Tp>
+        -: 1134:    struct __is_nt_move_assignable_impl<_Tp, false>
+        -: 1135:    : public false_type { };
+        -: 1136:
+        -: 1137:  template<typename _Tp>
+        -: 1138:    struct __is_nt_move_assignable_impl<_Tp, true>
+        -: 1139:    : public is_nothrow_assignable<_Tp&, _Tp&&>
+        -: 1140:    { };
+        -: 1141:
+        -: 1142:  /// is_nothrow_move_assignable
+        -: 1143:  template<typename _Tp>
+        -: 1144:    struct is_nothrow_move_assignable
+        -: 1145:    : public __is_nt_move_assignable_impl<_Tp>
+        -: 1146:    { };
+        -: 1147:
+        -: 1148:  /// is_trivially_constructible
+        -: 1149:  template<typename _Tp, typename... _Args>
+        -: 1150:    struct is_trivially_constructible
+        -: 1151:    : public __bool_constant<__is_trivially_constructible(_Tp, _Args...)>
+        -: 1152:    { };
+        -: 1153:
+        -: 1154:  /// is_trivially_default_constructible
+        -: 1155:  template<typename _Tp>
+        -: 1156:    struct is_trivially_default_constructible
+        -: 1157:    : public is_trivially_constructible<_Tp>::type
+        -: 1158:    { };
+        -: 1159:
+        -: 1160:  struct __do_is_implicitly_default_constructible_impl
+        -: 1161:  {
+        -: 1162:    template <typename _Tp>
+        -: 1163:    static void __helper(const _Tp&);
+        -: 1164:
+        -: 1165:    template <typename _Tp>
+        -: 1166:    static true_type __test(const _Tp&,
+        -: 1167:                            decltype(__helper<const _Tp&>({}))* = 0);
+        -: 1168:
+        -: 1169:    static false_type __test(...);
+        -: 1170:  };
+        -: 1171:
+        -: 1172:  template<typename _Tp>
+        -: 1173:    struct __is_implicitly_default_constructible_impl
+        -: 1174:      : public __do_is_implicitly_default_constructible_impl
+        -: 1175:  {
+        -: 1176:    typedef decltype(__test(declval<_Tp>())) type;
+        -: 1177:  };
+        -: 1178:
+        -: 1179:  template<typename _Tp>
+        -: 1180:    struct __is_implicitly_default_constructible_safe
+        -: 1181:      : public __is_implicitly_default_constructible_impl<_Tp>::type
+        -: 1182:  { };
+        -: 1183:
+        -: 1184:  template <typename _Tp>
+        -: 1185:    struct __is_implicitly_default_constructible
+        -: 1186:      : public __and_<is_default_constructible<_Tp>,
+        -: 1187:                      __is_implicitly_default_constructible_safe<_Tp>>
+        -: 1188:  { };
+        -: 1189:
+        -: 1190:  /// is_trivially_copy_constructible
+        -: 1191:
+        -: 1192:  template<typename _Tp, bool = __is_referenceable<_Tp>::value>
+        -: 1193:    struct __is_trivially_copy_constructible_impl;
+        -: 1194:
+        -: 1195:  template<typename _Tp>
+        -: 1196:    struct __is_trivially_copy_constructible_impl<_Tp, false>
+        -: 1197:    : public false_type { };
+        -: 1198:
+        -: 1199:  template<typename _Tp>
+        -: 1200:    struct __is_trivially_copy_constructible_impl<_Tp, true>
+        -: 1201:    : public __and_<is_copy_constructible<_Tp>,
+        -: 1202:		    integral_constant<bool,
+        -: 1203:			__is_trivially_constructible(_Tp, const _Tp&)>>
+        -: 1204:    { };
+        -: 1205:
+        -: 1206:  template<typename _Tp>
+        -: 1207:    struct is_trivially_copy_constructible
+        -: 1208:    : public __is_trivially_copy_constructible_impl<_Tp>
+        -: 1209:    { };
+        -: 1210:
+        -: 1211:  /// is_trivially_move_constructible
+        -: 1212:
+        -: 1213:  template<typename _Tp, bool = __is_referenceable<_Tp>::value>
+        -: 1214:    struct __is_trivially_move_constructible_impl;
+        -: 1215:
+        -: 1216:  template<typename _Tp>
+        -: 1217:    struct __is_trivially_move_constructible_impl<_Tp, false>
+        -: 1218:    : public false_type { };
+        -: 1219:
+        -: 1220:  template<typename _Tp>
+        -: 1221:    struct __is_trivially_move_constructible_impl<_Tp, true>
+        -: 1222:    : public __and_<is_move_constructible<_Tp>,
+        -: 1223:		    integral_constant<bool,
+        -: 1224:			__is_trivially_constructible(_Tp, _Tp&&)>>
+        -: 1225:    { };
+        -: 1226:
+        -: 1227:  template<typename _Tp>
+        -: 1228:    struct is_trivially_move_constructible
+        -: 1229:    : public __is_trivially_move_constructible_impl<_Tp>
+        -: 1230:    { };
+        -: 1231:
+        -: 1232:  /// is_trivially_assignable
+        -: 1233:  template<typename _Tp, typename _Up>
+        -: 1234:    struct is_trivially_assignable
+        -: 1235:    : public __bool_constant<__is_trivially_assignable(_Tp, _Up)>
+        -: 1236:    { };
+        -: 1237:
+        -: 1238:  /// is_trivially_copy_assignable
+        -: 1239:
+        -: 1240:  template<typename _Tp, bool = __is_referenceable<_Tp>::value>
+        -: 1241:    struct __is_trivially_copy_assignable_impl;
+        -: 1242:
+        -: 1243:  template<typename _Tp>
+        -: 1244:    struct __is_trivially_copy_assignable_impl<_Tp, false>
+        -: 1245:    : public false_type { };
+        -: 1246:
+        -: 1247:  template<typename _Tp>
+        -: 1248:    struct __is_trivially_copy_assignable_impl<_Tp, true>
+        -: 1249:    : public __and_<is_copy_assignable<_Tp>,
+        -: 1250:		    integral_constant<bool,
+        -: 1251:			__is_trivially_assignable(_Tp&, const _Tp&)>>
+        -: 1252:    { };
+        -: 1253:
+        -: 1254:  template<typename _Tp>
+        -: 1255:    struct is_trivially_copy_assignable
+        -: 1256:    : public __is_trivially_copy_assignable_impl<_Tp>
+        -: 1257:    { };
+        -: 1258:
+        -: 1259:  /// is_trivially_move_assignable
+        -: 1260:
+        -: 1261:  template<typename _Tp, bool = __is_referenceable<_Tp>::value>
+        -: 1262:    struct __is_trivially_move_assignable_impl;
+        -: 1263:
+        -: 1264:  template<typename _Tp>
+        -: 1265:    struct __is_trivially_move_assignable_impl<_Tp, false>
+        -: 1266:    : public false_type { };
+        -: 1267:
+        -: 1268:  template<typename _Tp>
+        -: 1269:    struct __is_trivially_move_assignable_impl<_Tp, true>
+        -: 1270:    : public __and_<is_move_assignable<_Tp>,
+        -: 1271:		    integral_constant<bool,
+        -: 1272:			__is_trivially_assignable(_Tp&, _Tp&&)>>
+        -: 1273:    { };
+        -: 1274:
+        -: 1275:  template<typename _Tp>
+        -: 1276:    struct is_trivially_move_assignable
+        -: 1277:    : public __is_trivially_move_assignable_impl<_Tp>
+        -: 1278:    { };
+        -: 1279:
+        -: 1280:  /// is_trivially_destructible
+        -: 1281:  template<typename _Tp>
+        -: 1282:    struct is_trivially_destructible
+        -: 1283:    : public __and_<is_destructible<_Tp>, integral_constant<bool,
+        -: 1284:			      __has_trivial_destructor(_Tp)>>
+        -: 1285:    { };
+        -: 1286:
+        -: 1287:
+        -: 1288:  /// has_virtual_destructor
+        -: 1289:  template<typename _Tp>
+        -: 1290:    struct has_virtual_destructor
+        -: 1291:    : public integral_constant<bool, __has_virtual_destructor(_Tp)>
+        -: 1292:    { };
+        -: 1293:
+        -: 1294:
+        -: 1295:  // type property queries.
+        -: 1296:
+        -: 1297:  /// alignment_of
+        -: 1298:  template<typename _Tp>
+        -: 1299:    struct alignment_of
+        -: 1300:    : public integral_constant<std::size_t, __alignof__(_Tp)> { };
+        -: 1301:
+        -: 1302:  /// rank
+        -: 1303:  template<typename>
+        -: 1304:    struct rank
+        -: 1305:    : public integral_constant<std::size_t, 0> { };
+        -: 1306:
+        -: 1307:  template<typename _Tp, std::size_t _Size>
+        -: 1308:    struct rank<_Tp[_Size]>
+        -: 1309:    : public integral_constant<std::size_t, 1 + rank<_Tp>::value> { };
+        -: 1310:
+        -: 1311:  template<typename _Tp>
+        -: 1312:    struct rank<_Tp[]>
+        -: 1313:    : public integral_constant<std::size_t, 1 + rank<_Tp>::value> { };
+        -: 1314:
+        -: 1315:  /// extent
+        -: 1316:  template<typename, unsigned _Uint>
+        -: 1317:    struct extent
+        -: 1318:    : public integral_constant<std::size_t, 0> { };
+        -: 1319:
+        -: 1320:  template<typename _Tp, unsigned _Uint, std::size_t _Size>
+        -: 1321:    struct extent<_Tp[_Size], _Uint>
+        -: 1322:    : public integral_constant<std::size_t,
+        -: 1323:			       _Uint == 0 ? _Size : extent<_Tp,
+        -: 1324:							   _Uint - 1>::value>
+        -: 1325:    { };
+        -: 1326:
+        -: 1327:  template<typename _Tp, unsigned _Uint>
+        -: 1328:    struct extent<_Tp[], _Uint>
+        -: 1329:    : public integral_constant<std::size_t,
+        -: 1330:			       _Uint == 0 ? 0 : extent<_Tp,
+        -: 1331:						       _Uint - 1>::value>
+        -: 1332:    { };
+        -: 1333:
+        -: 1334:
+        -: 1335:  // Type relations.
+        -: 1336:
+        -: 1337:  /// is_same
+        -: 1338:  template<typename, typename>
+        -: 1339:    struct is_same
+        -: 1340:    : public false_type { };
+        -: 1341:
+        -: 1342:  template<typename _Tp>
+        -: 1343:    struct is_same<_Tp, _Tp>
+        -: 1344:    : public true_type { };
+        -: 1345:
+        -: 1346:  /// is_base_of
+        -: 1347:  template<typename _Base, typename _Derived>
+        -: 1348:    struct is_base_of
+        -: 1349:    : public integral_constant<bool, __is_base_of(_Base, _Derived)>
+        -: 1350:    { };
+        -: 1351:
+        -: 1352:  template<typename _From, typename _To,
+        -: 1353:           bool = __or_<is_void<_From>, is_function<_To>,
+        -: 1354:                        is_array<_To>>::value>
+        -: 1355:    struct __is_convertible_helper
+        -: 1356:    { typedef typename is_void<_To>::type type; };
+        -: 1357:
+        -: 1358:  template<typename _From, typename _To>
+        -: 1359:    class __is_convertible_helper<_From, _To, false>
+        -: 1360:    {
+        -: 1361:       template<typename _To1>
+        -: 1362:	static void __test_aux(_To1);
+        -: 1363:
+        -: 1364:      template<typename _From1, typename _To1,
+        -: 1365:	       typename = decltype(__test_aux<_To1>(std::declval<_From1>()))>
+        -: 1366:	static true_type
+        -: 1367:	__test(int);
+        -: 1368:
+        -: 1369:      template<typename, typename>
+        -: 1370:	static false_type
+        -: 1371:	__test(...);
+        -: 1372:
+        -: 1373:    public:
+        -: 1374:      typedef decltype(__test<_From, _To>(0)) type;
+        -: 1375:    };
+        -: 1376:
+        -: 1377:
+        -: 1378:  /// is_convertible
+        -: 1379:  template<typename _From, typename _To>
+        -: 1380:    struct is_convertible
+        -: 1381:    : public __is_convertible_helper<_From, _To>::type
+        -: 1382:    { };
+        -: 1383:
+        -: 1384:
+        -: 1385:  // Const-volatile modifications.
+        -: 1386:
+        -: 1387:  /// remove_const
+        -: 1388:  template<typename _Tp>
+        -: 1389:    struct remove_const
+        -: 1390:    { typedef _Tp     type; };
+        -: 1391:
+        -: 1392:  template<typename _Tp>
+        -: 1393:    struct remove_const<_Tp const>
+        -: 1394:    { typedef _Tp     type; };
+        -: 1395:
+        -: 1396:  /// remove_volatile
+        -: 1397:  template<typename _Tp>
+        -: 1398:    struct remove_volatile
+        -: 1399:    { typedef _Tp     type; };
+        -: 1400:
+        -: 1401:  template<typename _Tp>
+        -: 1402:    struct remove_volatile<_Tp volatile>
+        -: 1403:    { typedef _Tp     type; };
+        -: 1404:
+        -: 1405:  /// remove_cv
+        -: 1406:  template<typename _Tp>
+        -: 1407:    struct remove_cv
+        -: 1408:    {
+        -: 1409:      typedef typename
+        -: 1410:      remove_const<typename remove_volatile<_Tp>::type>::type     type;
+        -: 1411:    };
+        -: 1412:
+        -: 1413:  /// add_const
+        -: 1414:  template<typename _Tp>
+        -: 1415:    struct add_const
+        -: 1416:    { typedef _Tp const     type; };
+        -: 1417:
+        -: 1418:  /// add_volatile
+        -: 1419:  template<typename _Tp>
+        -: 1420:    struct add_volatile
+        -: 1421:    { typedef _Tp volatile     type; };
+        -: 1422:
+        -: 1423:  /// add_cv
+        -: 1424:  template<typename _Tp>
+        -: 1425:    struct add_cv
+        -: 1426:    {
+        -: 1427:      typedef typename
+        -: 1428:      add_const<typename add_volatile<_Tp>::type>::type     type;
+        -: 1429:    };
+        -: 1430:
+        -: 1431:#if __cplusplus > 201103L
+        -: 1432:
+        -: 1433:#define __cpp_lib_transformation_trait_aliases 201304
+        -: 1434:
+        -: 1435:  /// Alias template for remove_const
+        -: 1436:  template<typename _Tp>
+        -: 1437:    using remove_const_t = typename remove_const<_Tp>::type;
+        -: 1438:
+        -: 1439:  /// Alias template for remove_volatile
+        -: 1440:  template<typename _Tp>
+        -: 1441:    using remove_volatile_t = typename remove_volatile<_Tp>::type;
+        -: 1442:
+        -: 1443:  /// Alias template for remove_cv
+        -: 1444:  template<typename _Tp>
+        -: 1445:    using remove_cv_t = typename remove_cv<_Tp>::type;
+        -: 1446:
+        -: 1447:  /// Alias template for add_const
+        -: 1448:  template<typename _Tp>
+        -: 1449:    using add_const_t = typename add_const<_Tp>::type;
+        -: 1450:
+        -: 1451:  /// Alias template for add_volatile
+        -: 1452:  template<typename _Tp>
+        -: 1453:    using add_volatile_t = typename add_volatile<_Tp>::type;
+        -: 1454:
+        -: 1455:  /// Alias template for add_cv
+        -: 1456:  template<typename _Tp>
+        -: 1457:    using add_cv_t = typename add_cv<_Tp>::type;
+        -: 1458:#endif
+        -: 1459:
+        -: 1460:  // Reference transformations.
+        -: 1461:
+        -: 1462:  /// remove_reference
+        -: 1463:  template<typename _Tp>
+        -: 1464:    struct remove_reference
+        -: 1465:    { typedef _Tp   type; };
+        -: 1466:
+        -: 1467:  template<typename _Tp>
+        -: 1468:    struct remove_reference<_Tp&>
+        -: 1469:    { typedef _Tp   type; };
+        -: 1470:
+        -: 1471:  template<typename _Tp>
+        -: 1472:    struct remove_reference<_Tp&&>
+        -: 1473:    { typedef _Tp   type; };
+        -: 1474:
+        -: 1475:  template<typename _Tp, bool = __is_referenceable<_Tp>::value>
+        -: 1476:    struct __add_lvalue_reference_helper
+        -: 1477:    { typedef _Tp   type; };
+        -: 1478:
+        -: 1479:  template<typename _Tp>
+        -: 1480:    struct __add_lvalue_reference_helper<_Tp, true>
+        -: 1481:    { typedef _Tp&   type; };
+        -: 1482:
+        -: 1483:  /// add_lvalue_reference
+        -: 1484:  template<typename _Tp>
+        -: 1485:    struct add_lvalue_reference
+        -: 1486:    : public __add_lvalue_reference_helper<_Tp>
+        -: 1487:    { };
+        -: 1488:
+        -: 1489:  template<typename _Tp, bool = __is_referenceable<_Tp>::value>
+        -: 1490:    struct __add_rvalue_reference_helper
+        -: 1491:    { typedef _Tp   type; };
+        -: 1492:
+        -: 1493:  template<typename _Tp>
+        -: 1494:    struct __add_rvalue_reference_helper<_Tp, true>
+        -: 1495:    { typedef _Tp&&   type; };
+        -: 1496:
+        -: 1497:  /// add_rvalue_reference
+        -: 1498:  template<typename _Tp>
+        -: 1499:    struct add_rvalue_reference
+        -: 1500:    : public __add_rvalue_reference_helper<_Tp>
+        -: 1501:    { };
+        -: 1502:
+        -: 1503:#if __cplusplus > 201103L
+        -: 1504:  /// Alias template for remove_reference
+        -: 1505:  template<typename _Tp>
+        -: 1506:    using remove_reference_t = typename remove_reference<_Tp>::type;
+        -: 1507:
+        -: 1508:  /// Alias template for add_lvalue_reference
+        -: 1509:  template<typename _Tp>
+        -: 1510:    using add_lvalue_reference_t = typename add_lvalue_reference<_Tp>::type;
+        -: 1511:
+        -: 1512:  /// Alias template for add_rvalue_reference
+        -: 1513:  template<typename _Tp>
+        -: 1514:    using add_rvalue_reference_t = typename add_rvalue_reference<_Tp>::type;
+        -: 1515:#endif
+        -: 1516:
+        -: 1517:  // Sign modifications.
+        -: 1518:
+        -: 1519:  // Utility for constructing identically cv-qualified types.
+        -: 1520:  template<typename _Unqualified, bool _IsConst, bool _IsVol>
+        -: 1521:    struct __cv_selector;
+        -: 1522:
+        -: 1523:  template<typename _Unqualified>
+        -: 1524:    struct __cv_selector<_Unqualified, false, false>
+        -: 1525:    { typedef _Unqualified __type; };
+        -: 1526:
+        -: 1527:  template<typename _Unqualified>
+        -: 1528:    struct __cv_selector<_Unqualified, false, true>
+        -: 1529:    { typedef volatile _Unqualified __type; };
+        -: 1530:
+        -: 1531:  template<typename _Unqualified>
+        -: 1532:    struct __cv_selector<_Unqualified, true, false>
+        -: 1533:    { typedef const _Unqualified __type; };
+        -: 1534:
+        -: 1535:  template<typename _Unqualified>
+        -: 1536:    struct __cv_selector<_Unqualified, true, true>
+        -: 1537:    { typedef const volatile _Unqualified __type; };
+        -: 1538:
+        -: 1539:  template<typename _Qualified, typename _Unqualified,
+        -: 1540:	   bool _IsConst = is_const<_Qualified>::value,
+        -: 1541:	   bool _IsVol = is_volatile<_Qualified>::value>
+        -: 1542:    class __match_cv_qualifiers
+        -: 1543:    {
+        -: 1544:      typedef __cv_selector<_Unqualified, _IsConst, _IsVol> __match;
+        -: 1545:
+        -: 1546:    public:
+        -: 1547:      typedef typename __match::__type __type;
+        -: 1548:    };
+        -: 1549:
+        -: 1550:  // Utility for finding the unsigned versions of signed integral types.
+        -: 1551:  template<typename _Tp>
+        -: 1552:    struct __make_unsigned
+        -: 1553:    { typedef _Tp __type; };
+        -: 1554:
+        -: 1555:  template<>
+        -: 1556:    struct __make_unsigned<char>
+        -: 1557:    { typedef unsigned char __type; };
+        -: 1558:
+        -: 1559:  template<>
+        -: 1560:    struct __make_unsigned<signed char>
+        -: 1561:    { typedef unsigned char __type; };
+        -: 1562:
+        -: 1563:  template<>
+        -: 1564:    struct __make_unsigned<short>
+        -: 1565:    { typedef unsigned short __type; };
+        -: 1566:
+        -: 1567:  template<>
+        -: 1568:    struct __make_unsigned<int>
+        -: 1569:    { typedef unsigned int __type; };
+        -: 1570:
+        -: 1571:  template<>
+        -: 1572:    struct __make_unsigned<long>
+        -: 1573:    { typedef unsigned long __type; };
+        -: 1574:
+        -: 1575:  template<>
+        -: 1576:    struct __make_unsigned<long long>
+        -: 1577:    { typedef unsigned long long __type; };
+        -: 1578:
+        -: 1579:#if defined(_GLIBCXX_USE_WCHAR_T) && !defined(__WCHAR_UNSIGNED__)
+        -: 1580:  template<>
+        -: 1581:    struct __make_unsigned<wchar_t> : __make_unsigned<__WCHAR_TYPE__>
+        -: 1582:    { };
+        -: 1583:#endif
+        -: 1584:
+        -: 1585:#if defined(__GLIBCXX_TYPE_INT_N_0)
+        -: 1586:  template<>
+        -: 1587:    struct __make_unsigned<__GLIBCXX_TYPE_INT_N_0>
+        -: 1588:    { typedef unsigned __GLIBCXX_TYPE_INT_N_0 __type; };
+        -: 1589:#endif
+        -: 1590:#if defined(__GLIBCXX_TYPE_INT_N_1)
+        -: 1591:  template<>
+        -: 1592:    struct __make_unsigned<__GLIBCXX_TYPE_INT_N_1>
+        -: 1593:    { typedef unsigned __GLIBCXX_TYPE_INT_N_1 __type; };
+        -: 1594:#endif
+        -: 1595:#if defined(__GLIBCXX_TYPE_INT_N_2)
+        -: 1596:  template<>
+        -: 1597:    struct __make_unsigned<__GLIBCXX_TYPE_INT_N_2>
+        -: 1598:    { typedef unsigned __GLIBCXX_TYPE_INT_N_2 __type; };
+        -: 1599:#endif
+        -: 1600:#if defined(__GLIBCXX_TYPE_INT_N_3)
+        -: 1601:  template<>
+        -: 1602:    struct __make_unsigned<__GLIBCXX_TYPE_INT_N_3>
+        -: 1603:    { typedef unsigned __GLIBCXX_TYPE_INT_N_3 __type; };
+        -: 1604:#endif
+        -: 1605:
+        -: 1606:  // Select between integral and enum: not possible to be both.
+        -: 1607:  template<typename _Tp,
+        -: 1608:	   bool _IsInt = is_integral<_Tp>::value,
+        -: 1609:	   bool _IsEnum = is_enum<_Tp>::value>
+        -: 1610:    class __make_unsigned_selector;
+        -: 1611:
+        -: 1612:  template<typename _Tp>
+        -: 1613:    class __make_unsigned_selector<_Tp, true, false>
+        -: 1614:    {
+        -: 1615:      typedef __make_unsigned<typename remove_cv<_Tp>::type> __unsignedt;
+        -: 1616:      typedef typename __unsignedt::__type __unsigned_type;
+        -: 1617:      typedef __match_cv_qualifiers<_Tp, __unsigned_type> __cv_unsigned;
+        -: 1618:
+        -: 1619:    public:
+        -: 1620:      typedef typename __cv_unsigned::__type __type;
+        -: 1621:    };
+        -: 1622:
+        -: 1623:  template<typename _Tp>
+        -: 1624:    class __make_unsigned_selector<_Tp, false, true>
+        -: 1625:    {
+        -: 1626:      // With -fshort-enums, an enum may be as small as a char.
+        -: 1627:      typedef unsigned char __smallest;
+        -: 1628:      static const bool __b0 = sizeof(_Tp) <= sizeof(__smallest);
+        -: 1629:      static const bool __b1 = sizeof(_Tp) <= sizeof(unsigned short);
+        -: 1630:      static const bool __b2 = sizeof(_Tp) <= sizeof(unsigned int);
+        -: 1631:      static const bool __b3 = sizeof(_Tp) <= sizeof(unsigned long);
+        -: 1632:      typedef conditional<__b3, unsigned long, unsigned long long> __cond3;
+        -: 1633:      typedef typename __cond3::type __cond3_type;
+        -: 1634:      typedef conditional<__b2, unsigned int, __cond3_type> __cond2;
+        -: 1635:      typedef typename __cond2::type __cond2_type;
+        -: 1636:      typedef conditional<__b1, unsigned short, __cond2_type> __cond1;
+        -: 1637:      typedef typename __cond1::type __cond1_type;
+        -: 1638:
+        -: 1639:      typedef typename conditional<__b0, __smallest, __cond1_type>::type
+        -: 1640:	__unsigned_type;
+        -: 1641:      typedef __match_cv_qualifiers<_Tp, __unsigned_type> __cv_unsigned;
+        -: 1642:
+        -: 1643:    public:
+        -: 1644:      typedef typename __cv_unsigned::__type __type;
+        -: 1645:    };
+        -: 1646:
+        -: 1647:  // Given an integral/enum type, return the corresponding unsigned
+        -: 1648:  // integer type.
+        -: 1649:  // Primary template.
+        -: 1650:  /// make_unsigned
+        -: 1651:  template<typename _Tp>
+        -: 1652:    struct make_unsigned
+        -: 1653:    { typedef typename __make_unsigned_selector<_Tp>::__type type; };
+        -: 1654:
+        -: 1655:  // Integral, but don't define.
+        -: 1656:  template<>
+        -: 1657:    struct make_unsigned<bool>;
+        -: 1658:
+        -: 1659:
+        -: 1660:  // Utility for finding the signed versions of unsigned integral types.
+        -: 1661:  template<typename _Tp>
+        -: 1662:    struct __make_signed
+        -: 1663:    { typedef _Tp __type; };
+        -: 1664:
+        -: 1665:  template<>
+        -: 1666:    struct __make_signed<char>
+        -: 1667:    { typedef signed char __type; };
+        -: 1668:
+        -: 1669:  template<>
+        -: 1670:    struct __make_signed<unsigned char>
+        -: 1671:    { typedef signed char __type; };
+        -: 1672:
+        -: 1673:  template<>
+        -: 1674:    struct __make_signed<unsigned short>
+        -: 1675:    { typedef signed short __type; };
+        -: 1676:
+        -: 1677:  template<>
+        -: 1678:    struct __make_signed<unsigned int>
+        -: 1679:    { typedef signed int __type; };
+        -: 1680:
+        -: 1681:  template<>
+        -: 1682:    struct __make_signed<unsigned long>
+        -: 1683:    { typedef signed long __type; };
+        -: 1684:
+        -: 1685:  template<>
+        -: 1686:    struct __make_signed<unsigned long long>
+        -: 1687:    { typedef signed long long __type; };
+        -: 1688:
+        -: 1689:#if defined(_GLIBCXX_USE_WCHAR_T) && defined(__WCHAR_UNSIGNED__)
+        -: 1690:  template<>
+        -: 1691:    struct __make_signed<wchar_t> : __make_signed<__WCHAR_TYPE__>
+        -: 1692:    { };
+        -: 1693:#endif
+        -: 1694:
+        -: 1695:#ifdef _GLIBCXX_USE_C99_STDINT_TR1
+        -: 1696:  template<>
+        -: 1697:    struct __make_signed<char16_t> : __make_signed<uint_least16_t>
+        -: 1698:    { };
+        -: 1699:  template<>
+        -: 1700:    struct __make_signed<char32_t> : __make_signed<uint_least32_t>
+        -: 1701:    { };
+        -: 1702:#endif
+        -: 1703:
+        -: 1704:#if defined(__GLIBCXX_TYPE_INT_N_0)
+        -: 1705:  template<>
+        -: 1706:    struct __make_signed<unsigned __GLIBCXX_TYPE_INT_N_0>
+        -: 1707:    { typedef __GLIBCXX_TYPE_INT_N_0 __type; };
+        -: 1708:#endif
+        -: 1709:#if defined(__GLIBCXX_TYPE_INT_N_1)
+        -: 1710:  template<>
+        -: 1711:    struct __make_signed<unsigned __GLIBCXX_TYPE_INT_N_1>
+        -: 1712:    { typedef __GLIBCXX_TYPE_INT_N_1 __type; };
+        -: 1713:#endif
+        -: 1714:#if defined(__GLIBCXX_TYPE_INT_N_2)
+        -: 1715:  template<>
+        -: 1716:    struct __make_signed<unsigned __GLIBCXX_TYPE_INT_N_2>
+        -: 1717:    { typedef __GLIBCXX_TYPE_INT_N_2 __type; };
+        -: 1718:#endif
+        -: 1719:#if defined(__GLIBCXX_TYPE_INT_N_3)
+        -: 1720:  template<>
+        -: 1721:    struct __make_signed<unsigned __GLIBCXX_TYPE_INT_N_3>
+        -: 1722:    { typedef __GLIBCXX_TYPE_INT_N_3 __type; };
+        -: 1723:#endif
+        -: 1724:
+        -: 1725:  // Select between integral and enum: not possible to be both.
+        -: 1726:  template<typename _Tp,
+        -: 1727:	   bool _IsInt = is_integral<_Tp>::value,
+        -: 1728:	   bool _IsEnum = is_enum<_Tp>::value>
+        -: 1729:    class __make_signed_selector;
+        -: 1730:
+        -: 1731:  template<typename _Tp>
+        -: 1732:    class __make_signed_selector<_Tp, true, false>
+        -: 1733:    {
+        -: 1734:      typedef __make_signed<typename remove_cv<_Tp>::type> __signedt;
+        -: 1735:      typedef typename __signedt::__type __signed_type;
+        -: 1736:      typedef __match_cv_qualifiers<_Tp, __signed_type> __cv_signed;
+        -: 1737:
+        -: 1738:    public:
+        -: 1739:      typedef typename __cv_signed::__type __type;
+        -: 1740:    };
+        -: 1741:
+        -: 1742:  template<typename _Tp>
+        -: 1743:    class __make_signed_selector<_Tp, false, true>
+        -: 1744:    {
+        -: 1745:      typedef typename __make_unsigned_selector<_Tp>::__type __unsigned_type;
+        -: 1746:
+        -: 1747:    public:
+        -: 1748:      typedef typename __make_signed_selector<__unsigned_type>::__type __type;
+        -: 1749:    };
+        -: 1750:
+        -: 1751:  // Given an integral/enum type, return the corresponding signed
+        -: 1752:  // integer type.
+        -: 1753:  // Primary template.
+        -: 1754:  /// make_signed
+        -: 1755:  template<typename _Tp>
+        -: 1756:    struct make_signed
+        -: 1757:    { typedef typename __make_signed_selector<_Tp>::__type type; };
+        -: 1758:
+        -: 1759:  // Integral, but don't define.
+        -: 1760:  template<>
+        -: 1761:    struct make_signed<bool>;
+        -: 1762:
+        -: 1763:#if __cplusplus > 201103L
+        -: 1764:  /// Alias template for make_signed
+        -: 1765:  template<typename _Tp>
+        -: 1766:    using make_signed_t = typename make_signed<_Tp>::type;
+        -: 1767:
+        -: 1768:  /// Alias template for make_unsigned
+        -: 1769:  template<typename _Tp>
+        -: 1770:    using make_unsigned_t = typename make_unsigned<_Tp>::type;
+        -: 1771:#endif
+        -: 1772:
+        -: 1773:  // Array modifications.
+        -: 1774:
+        -: 1775:  /// remove_extent
+        -: 1776:  template<typename _Tp>
+        -: 1777:    struct remove_extent
+        -: 1778:    { typedef _Tp     type; };
+        -: 1779:
+        -: 1780:  template<typename _Tp, std::size_t _Size>
+        -: 1781:    struct remove_extent<_Tp[_Size]>
+        -: 1782:    { typedef _Tp     type; };
+        -: 1783:
+        -: 1784:  template<typename _Tp>
+        -: 1785:    struct remove_extent<_Tp[]>
+        -: 1786:    { typedef _Tp     type; };
+        -: 1787:
+        -: 1788:  /// remove_all_extents
+        -: 1789:  template<typename _Tp>
+        -: 1790:    struct remove_all_extents
+        -: 1791:    { typedef _Tp     type; };
+        -: 1792:
+        -: 1793:  template<typename _Tp, std::size_t _Size>
+        -: 1794:    struct remove_all_extents<_Tp[_Size]>
+        -: 1795:    { typedef typename remove_all_extents<_Tp>::type     type; };
+        -: 1796:
+        -: 1797:  template<typename _Tp>
+        -: 1798:    struct remove_all_extents<_Tp[]>
+        -: 1799:    { typedef typename remove_all_extents<_Tp>::type     type; };
+        -: 1800:
+        -: 1801:#if __cplusplus > 201103L
+        -: 1802:  /// Alias template for remove_extent
+        -: 1803:  template<typename _Tp>
+        -: 1804:    using remove_extent_t = typename remove_extent<_Tp>::type;
+        -: 1805:
+        -: 1806:  /// Alias template for remove_all_extents
+        -: 1807:  template<typename _Tp>
+        -: 1808:    using remove_all_extents_t = typename remove_all_extents<_Tp>::type;
+        -: 1809:#endif
+        -: 1810:
+        -: 1811:  // Pointer modifications.
+        -: 1812:
+        -: 1813:  template<typename _Tp, typename>
+        -: 1814:    struct __remove_pointer_helper
+        -: 1815:    { typedef _Tp     type; };
+        -: 1816:
+        -: 1817:  template<typename _Tp, typename _Up>
+        -: 1818:    struct __remove_pointer_helper<_Tp, _Up*>
+        -: 1819:    { typedef _Up     type; };
+        -: 1820:
+        -: 1821:  /// remove_pointer
+        -: 1822:  template<typename _Tp>
+        -: 1823:    struct remove_pointer
+        -: 1824:    : public __remove_pointer_helper<_Tp, typename remove_cv<_Tp>::type>
+        -: 1825:    { };
+        -: 1826:
+        -: 1827:  /// add_pointer
+        -: 1828:  template<typename _Tp, bool = __or_<__is_referenceable<_Tp>,
+        -: 1829:				      is_void<_Tp>>::value>
+        -: 1830:    struct __add_pointer_helper
+        -: 1831:    { typedef _Tp     type; };
+        -: 1832:
+        -: 1833:  template<typename _Tp>
+        -: 1834:    struct __add_pointer_helper<_Tp, true>
+        -: 1835:    { typedef typename remove_reference<_Tp>::type*     type; };
+        -: 1836:
+        -: 1837:  template<typename _Tp>
+        -: 1838:    struct add_pointer
+        -: 1839:    : public __add_pointer_helper<_Tp>
+        -: 1840:    { };
+        -: 1841:
+        -: 1842:#if __cplusplus > 201103L
+        -: 1843:  /// Alias template for remove_pointer
+        -: 1844:  template<typename _Tp>
+        -: 1845:    using remove_pointer_t = typename remove_pointer<_Tp>::type;
+        -: 1846:
+        -: 1847:  /// Alias template for add_pointer
+        -: 1848:  template<typename _Tp>
+        -: 1849:    using add_pointer_t = typename add_pointer<_Tp>::type;
+        -: 1850:#endif
+        -: 1851:
+        -: 1852:  template<std::size_t _Len>
+        -: 1853:    struct __aligned_storage_msa
+        -: 1854:    {
+        -: 1855:      union __type
+        -: 1856:      {
+        -: 1857:	unsigned char __data[_Len];
+        -: 1858:	struct __attribute__((__aligned__)) { } __align;
+        -: 1859:      };
+        -: 1860:    };
+        -: 1861:
+        -: 1862:  /**
+        -: 1863:   *  @brief Alignment type.
+        -: 1864:   *
+        -: 1865:   *  The value of _Align is a default-alignment which shall be the
+        -: 1866:   *  most stringent alignment requirement for any C++ object type
+        -: 1867:   *  whose size is no greater than _Len (3.9). The member typedef
+        -: 1868:   *  type shall be a POD type suitable for use as uninitialized
+        -: 1869:   *  storage for any object whose size is at most _Len and whose
+        -: 1870:   *  alignment is a divisor of _Align.
+        -: 1871:  */
+        -: 1872:  template<std::size_t _Len, std::size_t _Align =
+        -: 1873:	   __alignof__(typename __aligned_storage_msa<_Len>::__type)>
+        -: 1874:    struct aligned_storage
+        -: 1875:    {
+        -: 1876:      union type
+        -: 1877:      {
+        -: 1878:	unsigned char __data[_Len];
+        -: 1879:	struct __attribute__((__aligned__((_Align)))) { } __align;
+        -: 1880:      };
+        -: 1881:    };
+        -: 1882:
+        -: 1883:  template <typename... _Types>
+        -: 1884:    struct __strictest_alignment
+        -: 1885:    {
+        -: 1886:      static const size_t _S_alignment = 0;
+        -: 1887:      static const size_t _S_size = 0;
+        -: 1888:    };
+        -: 1889:
+        -: 1890:  template <typename _Tp, typename... _Types>
+        -: 1891:    struct __strictest_alignment<_Tp, _Types...>
+        -: 1892:    {
+        -: 1893:      static const size_t _S_alignment =
+        -: 1894:        alignof(_Tp) > __strictest_alignment<_Types...>::_S_alignment
+        -: 1895:	? alignof(_Tp) : __strictest_alignment<_Types...>::_S_alignment;
+        -: 1896:      static const size_t _S_size =
+        -: 1897:        sizeof(_Tp) > __strictest_alignment<_Types...>::_S_size
+        -: 1898:	? sizeof(_Tp) : __strictest_alignment<_Types...>::_S_size;
+        -: 1899:    };
+        -: 1900:
+        -: 1901:  /**
+        -: 1902:   *  @brief Provide aligned storage for types.
+        -: 1903:   *
+        -: 1904:   *  [meta.trans.other]
+        -: 1905:   *
+        -: 1906:   *  Provides aligned storage for any of the provided types of at
+        -: 1907:   *  least size _Len.
+        -: 1908:   *
+        -: 1909:   *  @see aligned_storage
+        -: 1910:   */
+        -: 1911:  template <size_t _Len, typename... _Types>
+        -: 1912:    struct aligned_union
+        -: 1913:    {
+        -: 1914:    private:
+        -: 1915:      static_assert(sizeof...(_Types) != 0, "At least one type is required");
+        -: 1916:
+        -: 1917:      using __strictest = __strictest_alignment<_Types...>;
+        -: 1918:      static const size_t _S_len = _Len > __strictest::_S_size
+        -: 1919:	? _Len : __strictest::_S_size;
+        -: 1920:    public:
+        -: 1921:      /// The value of the strictest alignment of _Types.
+        -: 1922:      static const size_t alignment_value = __strictest::_S_alignment;
+        -: 1923:      /// The storage.
+        -: 1924:      typedef typename aligned_storage<_S_len, alignment_value>::type type;
+        -: 1925:    };
+        -: 1926:
+        -: 1927:  template <size_t _Len, typename... _Types>
+        -: 1928:    const size_t aligned_union<_Len, _Types...>::alignment_value;
+        -: 1929:
+        -: 1930:  // Decay trait for arrays and functions, used for perfect forwarding
+        -: 1931:  // in make_pair, make_tuple, etc.
+        -: 1932:  template<typename _Up,
+        -: 1933:	   bool _IsArray = is_array<_Up>::value,
+        -: 1934:	   bool _IsFunction = is_function<_Up>::value>
+        -: 1935:    struct __decay_selector;
+        -: 1936:
+        -: 1937:  // NB: DR 705.
+        -: 1938:  template<typename _Up>
+        -: 1939:    struct __decay_selector<_Up, false, false>
+        -: 1940:    { typedef typename remove_cv<_Up>::type __type; };
+        -: 1941:
+        -: 1942:  template<typename _Up>
+        -: 1943:    struct __decay_selector<_Up, true, false>
+        -: 1944:    { typedef typename remove_extent<_Up>::type* __type; };
+        -: 1945:
+        -: 1946:  template<typename _Up>
+        -: 1947:    struct __decay_selector<_Up, false, true>
+        -: 1948:    { typedef typename add_pointer<_Up>::type __type; };
+        -: 1949:
+        -: 1950:  /// decay
+        -: 1951:  template<typename _Tp>
+        -: 1952:    class decay
+        -: 1953:    {
+        -: 1954:      typedef typename remove_reference<_Tp>::type __remove_type;
+        -: 1955:
+        -: 1956:    public:
+        -: 1957:      typedef typename __decay_selector<__remove_type>::__type type;
+        -: 1958:    };
+        -: 1959:
+        -: 1960:  template<typename _Tp>
+        -: 1961:    class reference_wrapper;
+        -: 1962:
+        -: 1963:  // Helper which adds a reference to a type when given a reference_wrapper
+        -: 1964:  template<typename _Tp>
+        -: 1965:    struct __strip_reference_wrapper
+        -: 1966:    {
+        -: 1967:      typedef _Tp __type;
+        -: 1968:    };
+        -: 1969:
+        -: 1970:  template<typename _Tp>
+        -: 1971:    struct __strip_reference_wrapper<reference_wrapper<_Tp> >
+        -: 1972:    {
+        -: 1973:      typedef _Tp& __type;
+        -: 1974:    };
+        -: 1975:
+        -: 1976:  template<typename _Tp>
+        -: 1977:    struct __decay_and_strip
+        -: 1978:    {
+        -: 1979:      typedef typename __strip_reference_wrapper<
+        -: 1980:	typename decay<_Tp>::type>::__type __type;
+        -: 1981:    };
+        -: 1982:
+        -: 1983:
+        -: 1984:  // Primary template.
+        -: 1985:  /// Define a member typedef @c type only if a boolean constant is true.
+        -: 1986:  template<bool, typename _Tp = void>
+        -: 1987:    struct enable_if
+        -: 1988:    { };
+        -: 1989:
+        -: 1990:  // Partial specialization for true.
+        -: 1991:  template<typename _Tp>
+        -: 1992:    struct enable_if<true, _Tp>
+        -: 1993:    { typedef _Tp type; };
+        -: 1994:
+        -: 1995:  template<typename... _Cond>
+        -: 1996:    using _Require = typename enable_if<__and_<_Cond...>::value>::type;
+        -: 1997:
+        -: 1998:  // Primary template.
+        -: 1999:  /// Define a member typedef @c type to one of two argument types.
+        -: 2000:  template<bool _Cond, typename _Iftrue, typename _Iffalse>
+        -: 2001:    struct conditional
+        -: 2002:    { typedef _Iftrue type; };
+        -: 2003:
+        -: 2004:  // Partial specialization for false.
+        -: 2005:  template<typename _Iftrue, typename _Iffalse>
+        -: 2006:    struct conditional<false, _Iftrue, _Iffalse>
+        -: 2007:    { typedef _Iffalse type; };
+        -: 2008:
+        -: 2009:  /// common_type
+        -: 2010:  template<typename... _Tp>
+        -: 2011:    struct common_type;
+        -: 2012:
+        -: 2013:  // Sfinae-friendly common_type implementation:
+        -: 2014:
+        -: 2015:  struct __do_common_type_impl
+        -: 2016:  {
+        -: 2017:    template<typename _Tp, typename _Up>
+        -: 2018:      static __success_type<typename decay<decltype
+        -: 2019:			    (true ? std::declval<_Tp>()
+        -: 2020:			     : std::declval<_Up>())>::type> _S_test(int);
+        -: 2021:
+        -: 2022:    template<typename, typename>
+        -: 2023:      static __failure_type _S_test(...);
+        -: 2024:  };
+        -: 2025:
+        -: 2026:  template<typename _Tp, typename _Up>
+        -: 2027:    struct __common_type_impl
+        -: 2028:    : private __do_common_type_impl
+        -: 2029:    {
+        -: 2030:      typedef decltype(_S_test<_Tp, _Up>(0)) type;
+        -: 2031:    };
+        -: 2032:
+        -: 2033:  struct __do_member_type_wrapper
+        -: 2034:  {
+        -: 2035:    template<typename _Tp>
+        -: 2036:      static __success_type<typename _Tp::type> _S_test(int);
+        -: 2037:
+        -: 2038:    template<typename>
+        -: 2039:      static __failure_type _S_test(...);
+        -: 2040:  };
+        -: 2041:
+        -: 2042:  template<typename _Tp>
+        -: 2043:    struct __member_type_wrapper
+        -: 2044:    : private __do_member_type_wrapper
+        -: 2045:    {
+        -: 2046:      typedef decltype(_S_test<_Tp>(0)) type;
+        -: 2047:    };
+        -: 2048:
+        -: 2049:  template<typename _CTp, typename... _Args>
+        -: 2050:    struct __expanded_common_type_wrapper
+        -: 2051:    {
+        -: 2052:      typedef common_type<typename _CTp::type, _Args...> type;
+        -: 2053:    };
+        -: 2054:
+        -: 2055:  template<typename... _Args>
+        -: 2056:    struct __expanded_common_type_wrapper<__failure_type, _Args...>
+        -: 2057:    { typedef __failure_type type; };
+        -: 2058:
+        -: 2059:  template<typename _Tp>
+        -: 2060:    struct common_type<_Tp>
+        -: 2061:    { typedef typename decay<_Tp>::type type; };
+        -: 2062:
+        -: 2063:  template<typename _Tp, typename _Up>
+        -: 2064:    struct common_type<_Tp, _Up>
+        -: 2065:    : public __common_type_impl<_Tp, _Up>::type
+        -: 2066:    { };
+        -: 2067:
+        -: 2068:  template<typename _Tp, typename _Up, typename... _Vp>
+        -: 2069:    struct common_type<_Tp, _Up, _Vp...>
+        -: 2070:    : public __expanded_common_type_wrapper<typename __member_type_wrapper<
+        -: 2071:               common_type<_Tp, _Up>>::type, _Vp...>::type
+        -: 2072:    { };
+        -: 2073:
+        -: 2074:  /// The underlying type of an enum.
+        -: 2075:  template<typename _Tp>
+        -: 2076:    struct underlying_type
+        -: 2077:    {
+        -: 2078:      typedef __underlying_type(_Tp) type;
+        -: 2079:    };
+        -: 2080:
+        -: 2081:  template<typename _Tp>
+        -: 2082:    struct __declval_protector
+        -: 2083:    {
+        -: 2084:      static const bool __stop = false;
+        -: 2085:    };
+        -: 2086:
+        -: 2087:  template<typename _Tp>
+        -: 2088:    auto declval() noexcept -> decltype(__declval<_Tp>(0))
+        -: 2089:    {
+        -: 2090:      static_assert(__declval_protector<_Tp>::__stop,
+        -: 2091:		    "declval() must not be used!");
+        -: 2092:      return __declval<_Tp>(0);
+        -: 2093:    }
+        -: 2094:
+        -: 2095:  /// result_of
+        -: 2096:  template<typename _Signature>
+        -: 2097:    class result_of;
+        -: 2098:
+        -: 2099:  // Sfinae-friendly result_of implementation:
+        -: 2100:
+        -: 2101:#define __cpp_lib_result_of_sfinae 201210
+        -: 2102:
+        -: 2103:  struct __invoke_memfun_ref { };
+        -: 2104:  struct __invoke_memfun_deref { };
+        -: 2105:  struct __invoke_memobj_ref { };
+        -: 2106:  struct __invoke_memobj_deref { };
+        -: 2107:  struct __invoke_other { };
+        -: 2108:
+        -: 2109:  // Associate a tag type with a specialization of __success_type.
+        -: 2110:  template<typename _Tp, typename _Tag>
+        -: 2111:    struct __result_of_success : __success_type<_Tp>
+        -: 2112:    { using __invoke_type = _Tag; };
+        -: 2113:
+        -: 2114:  // [func.require] paragraph 1 bullet 1:
+        -: 2115:  struct __result_of_memfun_ref_impl
+        -: 2116:  {
+        -: 2117:    template<typename _Fp, typename _Tp1, typename... _Args>
+        -: 2118:      static __result_of_success<decltype(
+        -: 2119:      (std::declval<_Tp1>().*std::declval<_Fp>())(std::declval<_Args>()...)
+        -: 2120:      ), __invoke_memfun_ref> _S_test(int);
+        -: 2121:
+        -: 2122:    template<typename...>
+        -: 2123:      static __failure_type _S_test(...);
+        -: 2124:  };
+        -: 2125:
+        -: 2126:  template<typename _MemPtr, typename _Arg, typename... _Args>
+        -: 2127:    struct __result_of_memfun_ref
+        -: 2128:    : private __result_of_memfun_ref_impl
+        -: 2129:    {
+        -: 2130:      typedef decltype(_S_test<_MemPtr, _Arg, _Args...>(0)) type;
+        -: 2131:    };
+        -: 2132:
+        -: 2133:  // [func.require] paragraph 1 bullet 2:
+        -: 2134:  struct __result_of_memfun_deref_impl
+        -: 2135:  {
+        -: 2136:    template<typename _Fp, typename _Tp1, typename... _Args>
+        -: 2137:      static __result_of_success<decltype(
+        -: 2138:      ((*std::declval<_Tp1>()).*std::declval<_Fp>())(std::declval<_Args>()...)
+        -: 2139:      ), __invoke_memfun_deref> _S_test(int);
+        -: 2140:
+        -: 2141:    template<typename...>
+        -: 2142:      static __failure_type _S_test(...);
+        -: 2143:  };
+        -: 2144:
+        -: 2145:  template<typename _MemPtr, typename _Arg, typename... _Args>
+        -: 2146:    struct __result_of_memfun_deref
+        -: 2147:    : private __result_of_memfun_deref_impl
+        -: 2148:    {
+        -: 2149:      typedef decltype(_S_test<_MemPtr, _Arg, _Args...>(0)) type;
+        -: 2150:    };
+        -: 2151:
+        -: 2152:  // [func.require] paragraph 1 bullet 3:
+        -: 2153:  struct __result_of_memobj_ref_impl
+        -: 2154:  {
+        -: 2155:    template<typename _Fp, typename _Tp1>
+        -: 2156:      static __result_of_success<decltype(
+        -: 2157:      std::declval<_Tp1>().*std::declval<_Fp>()
+        -: 2158:      ), __invoke_memobj_ref> _S_test(int);
+        -: 2159:
+        -: 2160:    template<typename, typename>
+        -: 2161:      static __failure_type _S_test(...);
+        -: 2162:  };
+        -: 2163:
+        -: 2164:  template<typename _MemPtr, typename _Arg>
+        -: 2165:    struct __result_of_memobj_ref
+        -: 2166:    : private __result_of_memobj_ref_impl
+        -: 2167:    {
+        -: 2168:      typedef decltype(_S_test<_MemPtr, _Arg>(0)) type;
+        -: 2169:    };
+        -: 2170:
+        -: 2171:  // [func.require] paragraph 1 bullet 4:
+        -: 2172:  struct __result_of_memobj_deref_impl
+        -: 2173:  {
+        -: 2174:    template<typename _Fp, typename _Tp1>
+        -: 2175:      static __result_of_success<decltype(
+        -: 2176:      (*std::declval<_Tp1>()).*std::declval<_Fp>()
+        -: 2177:      ), __invoke_memobj_deref> _S_test(int);
+        -: 2178:
+        -: 2179:    template<typename, typename>
+        -: 2180:      static __failure_type _S_test(...);
+        -: 2181:  };
+        -: 2182:
+        -: 2183:  template<typename _MemPtr, typename _Arg>
+        -: 2184:    struct __result_of_memobj_deref
+        -: 2185:    : private __result_of_memobj_deref_impl
+        -: 2186:    {
+        -: 2187:      typedef decltype(_S_test<_MemPtr, _Arg>(0)) type;
+        -: 2188:    };
+        -: 2189:
+        -: 2190:  template<typename _MemPtr, typename _Arg>
+        -: 2191:    struct __result_of_memobj;
+        -: 2192:
+        -: 2193:  template<typename _Res, typename _Class, typename _Arg>
+        -: 2194:    struct __result_of_memobj<_Res _Class::*, _Arg>
+        -: 2195:    {
+        -: 2196:      typedef typename remove_cv<typename remove_reference<
+        -: 2197:        _Arg>::type>::type _Argval;
+        -: 2198:      typedef _Res _Class::* _MemPtr;
+        -: 2199:      typedef typename conditional<__or_<is_same<_Argval, _Class>,
+        -: 2200:        is_base_of<_Class, _Argval>>::value,
+        -: 2201:        __result_of_memobj_ref<_MemPtr, _Arg>,
+        -: 2202:        __result_of_memobj_deref<_MemPtr, _Arg>
+        -: 2203:      >::type::type type;
+        -: 2204:    };
+        -: 2205:
+        -: 2206:  template<typename _MemPtr, typename _Arg, typename... _Args>
+        -: 2207:    struct __result_of_memfun;
+        -: 2208:
+        -: 2209:  template<typename _Res, typename _Class, typename _Arg, typename... _Args>
+        -: 2210:    struct __result_of_memfun<_Res _Class::*, _Arg, _Args...>
+        -: 2211:    {
+        -: 2212:      typedef typename remove_cv<typename remove_reference<
+        -: 2213:        _Arg>::type>::type _Argval;
+        -: 2214:      typedef _Res _Class::* _MemPtr;
+        -: 2215:      typedef typename conditional<__or_<is_same<_Argval, _Class>,
+        -: 2216:        is_base_of<_Class, _Argval>>::value,
+        -: 2217:        __result_of_memfun_ref<_MemPtr, _Arg, _Args...>,
+        -: 2218:        __result_of_memfun_deref<_MemPtr, _Arg, _Args...>
+        -: 2219:      >::type::type type;
+        -: 2220:    };
+        -: 2221:
+        -: 2222:  // _GLIBCXX_RESOLVE_LIB_DEFECTS
+        -: 2223:  // 2219.  INVOKE-ing a pointer to member with a reference_wrapper
+        -: 2224:  //        as the object expression
+        -: 2225:
+        -: 2226:  // Used by result_of, invoke etc. to unwrap a reference_wrapper.
+        -: 2227:  template<typename _Tp, typename _Up = typename decay<_Tp>::type>
+        -: 2228:    struct __inv_unwrap
+        -: 2229:    {
+        -: 2230:      using type = _Tp;
+        -: 2231:    };
+        -: 2232:
+        -: 2233:  template<typename _Tp, typename _Up>
+        -: 2234:    struct __inv_unwrap<_Tp, reference_wrapper<_Up>>
+        -: 2235:    {
+        -: 2236:      using type = _Up&;
+        -: 2237:    };
+        -: 2238:
+        -: 2239:  template<bool, bool, typename _Functor, typename... _ArgTypes>
+        -: 2240:    struct __result_of_impl
+        -: 2241:    {
+        -: 2242:      typedef __failure_type type;
+        -: 2243:    };
+        -: 2244:
+        -: 2245:  template<typename _MemPtr, typename _Arg>
+        -: 2246:    struct __result_of_impl<true, false, _MemPtr, _Arg>
+        -: 2247:    : public __result_of_memobj<typename decay<_MemPtr>::type,
+        -: 2248:				typename __inv_unwrap<_Arg>::type>
+        -: 2249:    { };
+        -: 2250:
+        -: 2251:  template<typename _MemPtr, typename _Arg, typename... _Args>
+        -: 2252:    struct __result_of_impl<false, true, _MemPtr, _Arg, _Args...>
+        -: 2253:    : public __result_of_memfun<typename decay<_MemPtr>::type,
+        -: 2254:				typename __inv_unwrap<_Arg>::type, _Args...>
+        -: 2255:    { };
+        -: 2256:
+        -: 2257:  // [func.require] paragraph 1 bullet 5:
+        -: 2258:  struct __result_of_other_impl
+        -: 2259:  {
+        -: 2260:    template<typename _Fn, typename... _Args>
+        -: 2261:      static __result_of_success<decltype(
+        -: 2262:      std::declval<_Fn>()(std::declval<_Args>()...)
+        -: 2263:      ), __invoke_other> _S_test(int);
+        -: 2264:
+        -: 2265:    template<typename...>
+        -: 2266:      static __failure_type _S_test(...);
+        -: 2267:  };
+        -: 2268:
+        -: 2269:  template<typename _Functor, typename... _ArgTypes>
+        -: 2270:    struct __result_of_impl<false, false, _Functor, _ArgTypes...>
+        -: 2271:    : private __result_of_other_impl
+        -: 2272:    {
+        -: 2273:      typedef decltype(_S_test<_Functor, _ArgTypes...>(0)) type;
+        -: 2274:    };
+        -: 2275:
+        -: 2276:  // __invoke_result (std::invoke_result for C++11)
+        -: 2277:  template<typename _Functor, typename... _ArgTypes>
+        -: 2278:    struct __invoke_result
+        -: 2279:    : public __result_of_impl<
+        -: 2280:        is_member_object_pointer<
+        -: 2281:          typename remove_reference<_Functor>::type
+        -: 2282:        >::value,
+        -: 2283:        is_member_function_pointer<
+        -: 2284:          typename remove_reference<_Functor>::type
+        -: 2285:        >::value,
+        -: 2286:	_Functor, _ArgTypes...
+        -: 2287:      >::type
+        -: 2288:    { };
+        -: 2289:
+        -: 2290:  template<typename _Functor, typename... _ArgTypes>
+        -: 2291:    struct result_of<_Functor(_ArgTypes...)>
+        -: 2292:    : public __invoke_result<_Functor, _ArgTypes...>
+        -: 2293:    { };
+        -: 2294:
+        -: 2295:#if __cplusplus > 201103L
+        -: 2296:  /// Alias template for aligned_storage
+        -: 2297:  template<size_t _Len, size_t _Align =
+        -: 2298:	    __alignof__(typename __aligned_storage_msa<_Len>::__type)>
+        -: 2299:    using aligned_storage_t = typename aligned_storage<_Len, _Align>::type;
+        -: 2300:
+        -: 2301:  template <size_t _Len, typename... _Types>
+        -: 2302:    using aligned_union_t = typename aligned_union<_Len, _Types...>::type;
+        -: 2303:
+        -: 2304:  /// Alias template for decay
+        -: 2305:  template<typename _Tp>
+        -: 2306:    using decay_t = typename decay<_Tp>::type;
+        -: 2307:
+        -: 2308:  /// Alias template for enable_if
+        -: 2309:  template<bool _Cond, typename _Tp = void>
+        -: 2310:    using enable_if_t = typename enable_if<_Cond, _Tp>::type;
+        -: 2311:
+        -: 2312:  /// Alias template for conditional
+        -: 2313:  template<bool _Cond, typename _Iftrue, typename _Iffalse>
+        -: 2314:    using conditional_t = typename conditional<_Cond, _Iftrue, _Iffalse>::type;
+        -: 2315:
+        -: 2316:  /// Alias template for common_type
+        -: 2317:  template<typename... _Tp>
+        -: 2318:    using common_type_t = typename common_type<_Tp...>::type;
+        -: 2319:
+        -: 2320:  /// Alias template for underlying_type
+        -: 2321:  template<typename _Tp>
+        -: 2322:    using underlying_type_t = typename underlying_type<_Tp>::type;
+        -: 2323:
+        -: 2324:  /// Alias template for result_of
+        -: 2325:  template<typename _Tp>
+        -: 2326:    using result_of_t = typename result_of<_Tp>::type;
+        -: 2327:#endif
+        -: 2328:
+        -: 2329:  template<typename...> using __void_t = void;
+        -: 2330:
+        -: 2331:#if __cplusplus > 201402L || !defined(__STRICT_ANSI__) // c++1z or gnu++11
+        -: 2332:#define __cpp_lib_void_t 201411
+        -: 2333:  /// A metafunction that always yields void, used for detecting valid types.
+        -: 2334:  template<typename...> using void_t = void;
+        -: 2335:#endif
+        -: 2336:
+        -: 2337:  /// Implementation of the detection idiom (negative case).
+        -: 2338:  template<typename _Default, typename _AlwaysVoid,
+        -: 2339:	   template<typename...> class _Op, typename... _Args>
+        -: 2340:    struct __detector
+        -: 2341:    {
+        -: 2342:      using value_t = false_type;
+        -: 2343:      using type = _Default;
+        -: 2344:    };
+        -: 2345:
+        -: 2346:  /// Implementation of the detection idiom (positive case).
+        -: 2347:  template<typename _Default, template<typename...> class _Op,
+        -: 2348:	    typename... _Args>
+        -: 2349:    struct __detector<_Default, __void_t<_Op<_Args...>>, _Op, _Args...>
+        -: 2350:    {
+        -: 2351:      using value_t = true_type;
+        -: 2352:      using type = _Op<_Args...>;
+        -: 2353:    };
+        -: 2354:
+        -: 2355:  // Detect whether _Op<_Args...> is a valid type, use _Default if not.
+        -: 2356:  template<typename _Default, template<typename...> class _Op,
+        -: 2357:	   typename... _Args>
+        -: 2358:    using __detected_or = __detector<_Default, void, _Op, _Args...>;
+        -: 2359:
+        -: 2360:  // _Op<_Args...> if that is a valid type, otherwise _Default.
+        -: 2361:  template<typename _Default, template<typename...> class _Op,
+        -: 2362:	   typename... _Args>
+        -: 2363:    using __detected_or_t
+        -: 2364:      = typename __detected_or<_Default, _Op, _Args...>::type;
+        -: 2365:
+        -: 2366:  /// @} group metaprogramming
+        -: 2367:
+        -: 2368:  /**
+        -: 2369:   *  Use SFINAE to determine if the type _Tp has a publicly-accessible
+        -: 2370:   *  member type _NTYPE.
+        -: 2371:   */
+        -: 2372:#define _GLIBCXX_HAS_NESTED_TYPE(_NTYPE)				\
+        -: 2373:  template<typename _Tp, typename = __void_t<>>				\
+        -: 2374:    struct __has_##_NTYPE						\
+        -: 2375:    : false_type							\
+        -: 2376:    { };								\
+        -: 2377:  template<typename _Tp>						\
+        -: 2378:    struct __has_##_NTYPE<_Tp, __void_t<typename _Tp::_NTYPE>>		\
+        -: 2379:    : true_type								\
+        -: 2380:    { };
+        -: 2381:
+        -: 2382:  template <typename _Tp>
+        -: 2383:    struct __is_swappable;
+        -: 2384:
+        -: 2385:  template <typename _Tp>
+        -: 2386:    struct __is_nothrow_swappable;
+        -: 2387:
+        -: 2388:  template<typename... _Elements>
+        -: 2389:    class tuple;
+        -: 2390:
+        -: 2391:  template<typename>
+        -: 2392:    struct __is_tuple_like_impl : false_type
+        -: 2393:    { };
+        -: 2394:
+        -: 2395:  template<typename... _Tps>
+        -: 2396:    struct __is_tuple_like_impl<tuple<_Tps...>> : true_type
+        -: 2397:    { };
+        -: 2398:
+        -: 2399:  // Internal type trait that allows us to sfinae-protect tuple_cat.
+        -: 2400:  template<typename _Tp>
+        -: 2401:    struct __is_tuple_like
+        -: 2402:    : public __is_tuple_like_impl<typename remove_cv<
+        -: 2403:      typename remove_reference<_Tp>::type>::type>::type
+        -: 2404:    { };
+        -: 2405:
+        -: 2406:  template<typename _Tp>
+        -: 2407:    inline
+        -: 2408:    typename enable_if<__and_<__not_<__is_tuple_like<_Tp>>,
+        -: 2409:			      is_move_constructible<_Tp>,
+        -: 2410:			      is_move_assignable<_Tp>>::value>::type
+        -: 2411:    swap(_Tp&, _Tp&)
+        -: 2412:    noexcept(__and_<is_nothrow_move_constructible<_Tp>,
+        -: 2413:	            is_nothrow_move_assignable<_Tp>>::value);
+        -: 2414:
+        -: 2415:  template<typename _Tp, size_t _Nm>
+        -: 2416:    inline
+        -: 2417:    typename enable_if<__is_swappable<_Tp>::value>::type
+        -: 2418:    swap(_Tp (&__a)[_Nm], _Tp (&__b)[_Nm])
+        -: 2419:    noexcept(__is_nothrow_swappable<_Tp>::value);
+        -: 2420:
+        -: 2421:  namespace __swappable_details {
+        -: 2422:    using std::swap;
+        -: 2423:
+        -: 2424:    struct __do_is_swappable_impl
+        -: 2425:    {
+        -: 2426:      template<typename _Tp, typename
+        -: 2427:               = decltype(swap(std::declval<_Tp&>(), std::declval<_Tp&>()))>
+        -: 2428:        static true_type __test(int);
+        -: 2429:
+        -: 2430:      template<typename>
+        -: 2431:        static false_type __test(...);
+        -: 2432:    };
+        -: 2433:
+        -: 2434:    struct __do_is_nothrow_swappable_impl
+        -: 2435:    {
+        -: 2436:      template<typename _Tp>
+        -: 2437:        static __bool_constant<
+        -: 2438:          noexcept(swap(std::declval<_Tp&>(), std::declval<_Tp&>()))
+        -: 2439:        > __test(int);
+        -: 2440:
+        -: 2441:      template<typename>
+        -: 2442:        static false_type __test(...);
+        -: 2443:    };
+        -: 2444:
+        -: 2445:  } // namespace __swappable_details
+        -: 2446:
+        -: 2447:  template<typename _Tp>
+        -: 2448:    struct __is_swappable_impl
+        -: 2449:    : public __swappable_details::__do_is_swappable_impl
+        -: 2450:    {
+        -: 2451:      typedef decltype(__test<_Tp>(0)) type;
+        -: 2452:    };
+        -: 2453:
+        -: 2454:  template<typename _Tp>
+        -: 2455:    struct __is_nothrow_swappable_impl
+        -: 2456:    : public __swappable_details::__do_is_nothrow_swappable_impl
+        -: 2457:    {
+        -: 2458:      typedef decltype(__test<_Tp>(0)) type;
+        -: 2459:    };
+        -: 2460:
+        -: 2461:  template<typename _Tp>
+        -: 2462:    struct __is_swappable
+        -: 2463:    : public __is_swappable_impl<_Tp>::type
+        -: 2464:    { };
+        -: 2465:
+        -: 2466:  template<typename _Tp>
+        -: 2467:    struct __is_nothrow_swappable
+        -: 2468:    : public __is_nothrow_swappable_impl<_Tp>::type
+        -: 2469:    { };
+        -: 2470:
+        -: 2471:#if __cplusplus > 201402L || !defined(__STRICT_ANSI__) // c++1z or gnu++11
+        -: 2472:#define __cpp_lib_is_swappable 201603
+        -: 2473:  /// Metafunctions used for detecting swappable types: p0185r1
+        -: 2474:
+        -: 2475:  /// is_swappable
+        -: 2476:  template<typename _Tp>
+        -: 2477:    struct is_swappable
+        -: 2478:    : public __is_swappable_impl<_Tp>::type
+        -: 2479:    { };
+        -: 2480:
+        -: 2481:  /// is_nothrow_swappable
+        -: 2482:  template<typename _Tp>
+        -: 2483:    struct is_nothrow_swappable
+        -: 2484:    : public __is_nothrow_swappable_impl<_Tp>::type
+        -: 2485:    { };
+        -: 2486:
+        -: 2487:#if __cplusplus >= 201402L
+        -: 2488:  /// is_swappable_v
+        -: 2489:  template<typename _Tp>
+        -: 2490:    _GLIBCXX17_INLINE constexpr bool is_swappable_v =
+        -: 2491:      is_swappable<_Tp>::value;
+        -: 2492:
+        -: 2493:  /// is_nothrow_swappable_v
+        -: 2494:  template<typename _Tp>
+        -: 2495:    _GLIBCXX17_INLINE constexpr bool is_nothrow_swappable_v =
+        -: 2496:      is_nothrow_swappable<_Tp>::value;
+        -: 2497:#endif // __cplusplus >= 201402L
+        -: 2498:
+        -: 2499:  namespace __swappable_with_details {
+        -: 2500:    using std::swap;
+        -: 2501:
+        -: 2502:    struct __do_is_swappable_with_impl
+        -: 2503:    {
+        -: 2504:      template<typename _Tp, typename _Up, typename
+        -: 2505:               = decltype(swap(std::declval<_Tp>(), std::declval<_Up>())),
+        -: 2506:               typename
+        -: 2507:               = decltype(swap(std::declval<_Up>(), std::declval<_Tp>()))>
+        -: 2508:        static true_type __test(int);
+        -: 2509:
+        -: 2510:      template<typename, typename>
+        -: 2511:        static false_type __test(...);
+        -: 2512:    };
+        -: 2513:
+        -: 2514:    struct __do_is_nothrow_swappable_with_impl
+        -: 2515:    {
+        -: 2516:      template<typename _Tp, typename _Up>
+        -: 2517:        static __bool_constant<
+        -: 2518:          noexcept(swap(std::declval<_Tp>(), std::declval<_Up>()))
+        -: 2519:          &&
+        -: 2520:          noexcept(swap(std::declval<_Up>(), std::declval<_Tp>()))
+        -: 2521:        > __test(int);
+        -: 2522:
+        -: 2523:      template<typename, typename>
+        -: 2524:        static false_type __test(...);
+        -: 2525:    };
+        -: 2526:
+        -: 2527:  } // namespace __swappable_with_details
+        -: 2528:
+        -: 2529:  template<typename _Tp, typename _Up>
+        -: 2530:    struct __is_swappable_with_impl
+        -: 2531:    : public __swappable_with_details::__do_is_swappable_with_impl
+        -: 2532:    {
+        -: 2533:      typedef decltype(__test<_Tp, _Up>(0)) type;
+        -: 2534:    };
+        -: 2535:
+        -: 2536:  // Optimization for the homogenous lvalue case, not required:
+        -: 2537:  template<typename _Tp>
+        -: 2538:    struct __is_swappable_with_impl<_Tp&, _Tp&>
+        -: 2539:    : public __swappable_details::__do_is_swappable_impl
+        -: 2540:    {
+        -: 2541:      typedef decltype(__test<_Tp&>(0)) type;
+        -: 2542:    };
+        -: 2543:
+        -: 2544:  template<typename _Tp, typename _Up>
+        -: 2545:    struct __is_nothrow_swappable_with_impl
+        -: 2546:    : public __swappable_with_details::__do_is_nothrow_swappable_with_impl
+        -: 2547:    {
+        -: 2548:      typedef decltype(__test<_Tp, _Up>(0)) type;
+        -: 2549:    };
+        -: 2550:
+        -: 2551:  // Optimization for the homogenous lvalue case, not required:
+        -: 2552:  template<typename _Tp>
+        -: 2553:    struct __is_nothrow_swappable_with_impl<_Tp&, _Tp&>
+        -: 2554:    : public __swappable_details::__do_is_nothrow_swappable_impl
+        -: 2555:    {
+        -: 2556:      typedef decltype(__test<_Tp&>(0)) type;
+        -: 2557:    };
+        -: 2558:
+        -: 2559:  /// is_swappable_with
+        -: 2560:  template<typename _Tp, typename _Up>
+        -: 2561:    struct is_swappable_with
+        -: 2562:    : public __is_swappable_with_impl<_Tp, _Up>::type
+        -: 2563:    { };
+        -: 2564:
+        -: 2565:  /// is_nothrow_swappable_with
+        -: 2566:  template<typename _Tp, typename _Up>
+        -: 2567:    struct is_nothrow_swappable_with
+        -: 2568:    : public __is_nothrow_swappable_with_impl<_Tp, _Up>::type
+        -: 2569:    { };
+        -: 2570:
+        -: 2571:#if __cplusplus >= 201402L
+        -: 2572:  /// is_swappable_with_v
+        -: 2573:  template<typename _Tp, typename _Up>
+        -: 2574:    _GLIBCXX17_INLINE constexpr bool is_swappable_with_v =
+        -: 2575:      is_swappable_with<_Tp, _Up>::value;
+        -: 2576:
+        -: 2577:  /// is_nothrow_swappable_with_v
+        -: 2578:  template<typename _Tp, typename _Up>
+        -: 2579:    _GLIBCXX17_INLINE constexpr bool is_nothrow_swappable_with_v =
+        -: 2580:      is_nothrow_swappable_with<_Tp, _Up>::value;
+        -: 2581:#endif // __cplusplus >= 201402L
+        -: 2582:
+        -: 2583:#endif// c++1z or gnu++11
+        -: 2584:
+        -: 2585:  // __is_invocable (std::is_invocable for C++11)
+        -: 2586:
+        -: 2587:  template<typename _Result, typename _Ret, typename = void>
+        -: 2588:    struct __is_invocable_impl : false_type { };
+        -: 2589:
+        -: 2590:  template<typename _Result, typename _Ret>
+        -: 2591:    struct __is_invocable_impl<_Result, _Ret, __void_t<typename _Result::type>>
+        -: 2592:    : __or_<is_void<_Ret>, is_convertible<typename _Result::type, _Ret>>::type
+        -: 2593:    { };
+        -: 2594:
+        -: 2595:  template<typename _Fn, typename... _ArgTypes>
+        -: 2596:    struct __is_invocable
+        -: 2597:    : __is_invocable_impl<__invoke_result<_Fn, _ArgTypes...>, void>::type
+        -: 2598:    { };
+        -: 2599:
+        -: 2600:  template<typename _Fn, typename _Tp, typename... _Args>
+        -: 2601:    constexpr bool __call_is_nt(__invoke_memfun_ref)
+        -: 2602:    {
+        -: 2603:      using _Up = typename __inv_unwrap<_Tp>::type;
+        -: 2604:      return noexcept((std::declval<_Up>().*std::declval<_Fn>())(
+        -: 2605:	    std::declval<_Args>()...));
+        -: 2606:    }
+        -: 2607:
+        -: 2608:  template<typename _Fn, typename _Tp, typename... _Args>
+        -: 2609:    constexpr bool __call_is_nt(__invoke_memfun_deref)
+        -: 2610:    {
+        -: 2611:      return noexcept(((*std::declval<_Tp>()).*std::declval<_Fn>())(
+        -: 2612:	    std::declval<_Args>()...));
+        -: 2613:    }
+        -: 2614:
+        -: 2615:  template<typename _Fn, typename _Tp>
+        -: 2616:    constexpr bool __call_is_nt(__invoke_memobj_ref)
+        -: 2617:    {
+        -: 2618:      using _Up = typename __inv_unwrap<_Tp>::type;
+        -: 2619:      return noexcept(std::declval<_Up>().*std::declval<_Fn>());
+        -: 2620:    }
+        -: 2621:
+        -: 2622:  template<typename _Fn, typename _Tp>
+        -: 2623:    constexpr bool __call_is_nt(__invoke_memobj_deref)
+        -: 2624:    {
+        -: 2625:      return noexcept((*std::declval<_Tp>()).*std::declval<_Fn>());
+        -: 2626:    }
+        -: 2627:
+        -: 2628:  template<typename _Fn, typename... _Args>
+        -: 2629:    constexpr bool __call_is_nt(__invoke_other)
+        -: 2630:    {
+        -: 2631:      return noexcept(std::declval<_Fn>()(std::declval<_Args>()...));
+        -: 2632:    }
+        -: 2633:
+        -: 2634:  template<typename _Result, typename _Fn, typename... _Args>
+        -: 2635:    struct __call_is_nothrow
+        -: 2636:    : __bool_constant<
+        -: 2637:	std::__call_is_nt<_Fn, _Args...>(typename _Result::__invoke_type{})
+        -: 2638:      >
+        -: 2639:    { };
+        -: 2640:
+        -: 2641:  template<typename _Fn, typename... _Args>
+        -: 2642:    using __call_is_nothrow_
+        -: 2643:      = __call_is_nothrow<__invoke_result<_Fn, _Args...>, _Fn, _Args...>;
+        -: 2644:
+        -: 2645:  // __is_nothrow_invocable (std::is_nothrow_invocable for C++11)
+        -: 2646:  template<typename _Fn, typename... _Args>
+        -: 2647:    struct __is_nothrow_invocable
+        -: 2648:    : __and_<__is_invocable<_Fn, _Args...>,
+        -: 2649:             __call_is_nothrow_<_Fn, _Args...>>::type
+        -: 2650:    { };
+        -: 2651:
+        -: 2652:  struct __nonesuch {
+        -: 2653:    __nonesuch() = delete;
+        -: 2654:    ~__nonesuch() = delete;
+        -: 2655:    __nonesuch(__nonesuch const&) = delete;
+        -: 2656:    void operator=(__nonesuch const&) = delete;
+        -: 2657:  };
+        -: 2658:
+        -: 2659:#if __cplusplus >= 201703L
+        -: 2660:# define __cpp_lib_is_invocable 201703
+        -: 2661:
+        -: 2662:  /// std::invoke_result
+        -: 2663:  template<typename _Functor, typename... _ArgTypes>
+        -: 2664:    struct invoke_result
+        -: 2665:    : public __invoke_result<_Functor, _ArgTypes...>
+        -: 2666:    { };
+        -: 2667:
+        -: 2668:  /// std::invoke_result_t
+        -: 2669:  template<typename _Fn, typename... _Args>
+        -: 2670:    using invoke_result_t = typename invoke_result<_Fn, _Args...>::type;
+        -: 2671:
+        -: 2672:  /// std::is_invocable
+        -: 2673:  template<typename _Fn, typename... _ArgTypes>
+        -: 2674:    struct is_invocable
+        -: 2675:    : __is_invocable_impl<__invoke_result<_Fn, _ArgTypes...>, void>::type
+        -: 2676:    { };
+        -: 2677:
+        -: 2678:  /// std::is_invocable_r
+        -: 2679:  template<typename _Ret, typename _Fn, typename... _ArgTypes>
+        -: 2680:    struct is_invocable_r
+        -: 2681:    : __is_invocable_impl<__invoke_result<_Fn, _ArgTypes...>, _Ret>::type
+        -: 2682:    { };
+        -: 2683:
+        -: 2684:  /// std::is_nothrow_invocable
+        -: 2685:  template<typename _Fn, typename... _ArgTypes>
+        -: 2686:    struct is_nothrow_invocable
+        -: 2687:    : __and_<__is_invocable_impl<__invoke_result<_Fn, _ArgTypes...>, void>,
+        -: 2688:             __call_is_nothrow_<_Fn, _ArgTypes...>>::type
+        -: 2689:    { };
+        -: 2690:
+        -: 2691:  template<typename _Result, typename _Ret, typename = void>
+        -: 2692:    struct __is_nt_invocable_impl : false_type { };
+        -: 2693:
+        -: 2694:  template<typename _Result, typename _Ret>
+        -: 2695:    struct __is_nt_invocable_impl<_Result, _Ret,
+        -: 2696:				  __void_t<typename _Result::type>>
+        -: 2697:    : __or_<is_void<_Ret>,
+        -: 2698:	    __and_<is_convertible<typename _Result::type, _Ret>,
+        -: 2699:		   is_nothrow_constructible<_Ret, typename _Result::type>>>
+        -: 2700:    { };
+        -: 2701:
+        -: 2702:  /// std::is_nothrow_invocable_r
+        -: 2703:  template<typename _Ret, typename _Fn, typename... _ArgTypes>
+        -: 2704:    struct is_nothrow_invocable_r
+        -: 2705:    : __and_<__is_nt_invocable_impl<__invoke_result<_Fn, _ArgTypes...>, _Ret>,
+        -: 2706:             __call_is_nothrow_<_Fn, _ArgTypes...>>::type
+        -: 2707:    { };
+        -: 2708:
+        -: 2709:  /// std::is_invocable_v
+        -: 2710:  template<typename _Fn, typename... _Args>
+        -: 2711:    inline constexpr bool is_invocable_v = is_invocable<_Fn, _Args...>::value;
+        -: 2712:
+        -: 2713:  /// std::is_nothrow_invocable_v
+        -: 2714:  template<typename _Fn, typename... _Args>
+        -: 2715:    inline constexpr bool is_nothrow_invocable_v
+        -: 2716:      = is_nothrow_invocable<_Fn, _Args...>::value;
+        -: 2717:
+        -: 2718:  /// std::is_invocable_r_v
+        -: 2719:  template<typename _Fn, typename... _Args>
+        -: 2720:    inline constexpr bool is_invocable_r_v
+        -: 2721:      = is_invocable_r<_Fn, _Args...>::value;
+        -: 2722:
+        -: 2723:  /// std::is_nothrow_invocable_r_v
+        -: 2724:  template<typename _Fn, typename... _Args>
+        -: 2725:    inline constexpr bool is_nothrow_invocable_r_v
+        -: 2726:      = is_nothrow_invocable_r<_Fn, _Args...>::value;
+        -: 2727:#endif // C++17
+        -: 2728:
+        -: 2729:#if __cplusplus >= 201703L
+        -: 2730:# define __cpp_lib_type_trait_variable_templates 201510L
+        -: 2731:template <typename _Tp>
+        -: 2732:  inline constexpr bool is_void_v = is_void<_Tp>::value;
+        -: 2733:template <typename _Tp>
+        -: 2734:  inline constexpr bool is_null_pointer_v = is_null_pointer<_Tp>::value;
+        -: 2735:template <typename _Tp>
+        -: 2736:  inline constexpr bool is_integral_v = is_integral<_Tp>::value;
+        -: 2737:template <typename _Tp>
+        -: 2738:  inline constexpr bool is_floating_point_v = is_floating_point<_Tp>::value;
+        -: 2739:template <typename _Tp>
+        -: 2740:  inline constexpr bool is_array_v = is_array<_Tp>::value;
+        -: 2741:template <typename _Tp>
+        -: 2742:  inline constexpr bool is_pointer_v = is_pointer<_Tp>::value;
+        -: 2743:template <typename _Tp>
+        -: 2744:  inline constexpr bool is_lvalue_reference_v =
+        -: 2745:    is_lvalue_reference<_Tp>::value;
+        -: 2746:template <typename _Tp>
+        -: 2747:  inline constexpr bool is_rvalue_reference_v =
+        -: 2748:    is_rvalue_reference<_Tp>::value;
+        -: 2749:template <typename _Tp>
+        -: 2750:  inline constexpr bool is_member_object_pointer_v =
+        -: 2751:    is_member_object_pointer<_Tp>::value;
+        -: 2752:template <typename _Tp>
+        -: 2753:  inline constexpr bool is_member_function_pointer_v =
+        -: 2754:    is_member_function_pointer<_Tp>::value;
+        -: 2755:template <typename _Tp>
+        -: 2756:  inline constexpr bool is_enum_v = is_enum<_Tp>::value;
+        -: 2757:template <typename _Tp>
+        -: 2758:  inline constexpr bool is_union_v = is_union<_Tp>::value;
+        -: 2759:template <typename _Tp>
+        -: 2760:  inline constexpr bool is_class_v = is_class<_Tp>::value;
+        -: 2761:template <typename _Tp>
+        -: 2762:  inline constexpr bool is_function_v = is_function<_Tp>::value;
+        -: 2763:template <typename _Tp>
+        -: 2764:  inline constexpr bool is_reference_v = is_reference<_Tp>::value;
+        -: 2765:template <typename _Tp>
+        -: 2766:  inline constexpr bool is_arithmetic_v = is_arithmetic<_Tp>::value;
+        -: 2767:template <typename _Tp>
+        -: 2768:  inline constexpr bool is_fundamental_v = is_fundamental<_Tp>::value;
+        -: 2769:template <typename _Tp>
+        -: 2770:  inline constexpr bool is_object_v = is_object<_Tp>::value;
+        -: 2771:template <typename _Tp>
+        -: 2772:  inline constexpr bool is_scalar_v = is_scalar<_Tp>::value;
+        -: 2773:template <typename _Tp>
+        -: 2774:  inline constexpr bool is_compound_v = is_compound<_Tp>::value;
+        -: 2775:template <typename _Tp>
+        -: 2776:  inline constexpr bool is_member_pointer_v = is_member_pointer<_Tp>::value;
+        -: 2777:template <typename _Tp>
+        -: 2778:  inline constexpr bool is_const_v = is_const<_Tp>::value;
+        -: 2779:template <typename _Tp>
+        -: 2780:  inline constexpr bool is_volatile_v = is_volatile<_Tp>::value;
+        -: 2781:template <typename _Tp>
+        -: 2782:  inline constexpr bool is_trivial_v = is_trivial<_Tp>::value;
+        -: 2783:template <typename _Tp>
+        -: 2784:  inline constexpr bool is_trivially_copyable_v =
+        -: 2785:    is_trivially_copyable<_Tp>::value;
+        -: 2786:template <typename _Tp>
+        -: 2787:  inline constexpr bool is_standard_layout_v = is_standard_layout<_Tp>::value;
+        -: 2788:template <typename _Tp>
+        -: 2789:  inline constexpr bool is_pod_v = is_pod<_Tp>::value;
+        -: 2790:template <typename _Tp>
+        -: 2791:  inline constexpr bool is_literal_type_v = is_literal_type<_Tp>::value;
+        -: 2792:template <typename _Tp>
+        -: 2793:  inline constexpr bool is_empty_v = is_empty<_Tp>::value;
+        -: 2794:template <typename _Tp>
+        -: 2795:  inline constexpr bool is_polymorphic_v = is_polymorphic<_Tp>::value;
+        -: 2796:template <typename _Tp>
+        -: 2797:  inline constexpr bool is_abstract_v = is_abstract<_Tp>::value;
+        -: 2798:template <typename _Tp>
+        -: 2799:  inline constexpr bool is_final_v = is_final<_Tp>::value;
+        -: 2800:template <typename _Tp>
+        -: 2801:  inline constexpr bool is_signed_v = is_signed<_Tp>::value;
+        -: 2802:template <typename _Tp>
+        -: 2803:  inline constexpr bool is_unsigned_v = is_unsigned<_Tp>::value;
+        -: 2804:template <typename _Tp, typename... _Args>
+        -: 2805:  inline constexpr bool is_constructible_v =
+        -: 2806:    is_constructible<_Tp, _Args...>::value;
+        -: 2807:template <typename _Tp>
+        -: 2808:  inline constexpr bool is_default_constructible_v =
+        -: 2809:    is_default_constructible<_Tp>::value;
+        -: 2810:template <typename _Tp>
+        -: 2811:  inline constexpr bool is_copy_constructible_v =
+        -: 2812:    is_copy_constructible<_Tp>::value;
+        -: 2813:template <typename _Tp>
+        -: 2814:  inline constexpr bool is_move_constructible_v =
+        -: 2815:    is_move_constructible<_Tp>::value;
+        -: 2816:template <typename _Tp, typename _Up>
+        -: 2817:  inline constexpr bool is_assignable_v = is_assignable<_Tp, _Up>::value;
+        -: 2818:template <typename _Tp>
+        -: 2819:  inline constexpr bool is_copy_assignable_v = is_copy_assignable<_Tp>::value;
+        -: 2820:template <typename _Tp>
+        -: 2821:  inline constexpr bool is_move_assignable_v = is_move_assignable<_Tp>::value;
+        -: 2822:template <typename _Tp>
+        -: 2823:  inline constexpr bool is_destructible_v = is_destructible<_Tp>::value;
+        -: 2824:template <typename _Tp, typename... _Args>
+        -: 2825:  inline constexpr bool is_trivially_constructible_v =
+        -: 2826:    is_trivially_constructible<_Tp, _Args...>::value;
+        -: 2827:template <typename _Tp>
+        -: 2828:  inline constexpr bool is_trivially_default_constructible_v =
+        -: 2829:    is_trivially_default_constructible<_Tp>::value;
+        -: 2830:template <typename _Tp>
+        -: 2831:  inline constexpr bool is_trivially_copy_constructible_v =
+        -: 2832:    is_trivially_copy_constructible<_Tp>::value;
+        -: 2833:template <typename _Tp>
+        -: 2834:  inline constexpr bool is_trivially_move_constructible_v =
+        -: 2835:    is_trivially_move_constructible<_Tp>::value;
+        -: 2836:template <typename _Tp, typename _Up>
+        -: 2837:  inline constexpr bool is_trivially_assignable_v =
+        -: 2838:    is_trivially_assignable<_Tp, _Up>::value;
+        -: 2839:template <typename _Tp>
+        -: 2840:  inline constexpr bool is_trivially_copy_assignable_v =
+        -: 2841:    is_trivially_copy_assignable<_Tp>::value;
+        -: 2842:template <typename _Tp>
+        -: 2843:  inline constexpr bool is_trivially_move_assignable_v =
+        -: 2844:    is_trivially_move_assignable<_Tp>::value;
+        -: 2845:template <typename _Tp>
+        -: 2846:  inline constexpr bool is_trivially_destructible_v =
+        -: 2847:    is_trivially_destructible<_Tp>::value;
+        -: 2848:template <typename _Tp, typename... _Args>
+        -: 2849:  inline constexpr bool is_nothrow_constructible_v =
+        -: 2850:    is_nothrow_constructible<_Tp, _Args...>::value;
+        -: 2851:template <typename _Tp>
+        -: 2852:  inline constexpr bool is_nothrow_default_constructible_v =
+        -: 2853:    is_nothrow_default_constructible<_Tp>::value;
+        -: 2854:template <typename _Tp>
+        -: 2855:  inline constexpr bool is_nothrow_copy_constructible_v =
+        -: 2856:    is_nothrow_copy_constructible<_Tp>::value;
+        -: 2857:template <typename _Tp>
+        -: 2858:  inline constexpr bool is_nothrow_move_constructible_v =
+        -: 2859:    is_nothrow_move_constructible<_Tp>::value;
+        -: 2860:template <typename _Tp, typename _Up>
+        -: 2861:  inline constexpr bool is_nothrow_assignable_v =
+        -: 2862:    is_nothrow_assignable<_Tp, _Up>::value;
+        -: 2863:template <typename _Tp>
+        -: 2864:  inline constexpr bool is_nothrow_copy_assignable_v =
+        -: 2865:    is_nothrow_copy_assignable<_Tp>::value;
+        -: 2866:template <typename _Tp>
+        -: 2867:  inline constexpr bool is_nothrow_move_assignable_v =
+        -: 2868:    is_nothrow_move_assignable<_Tp>::value;
+        -: 2869:template <typename _Tp>
+        -: 2870:  inline constexpr bool is_nothrow_destructible_v =
+        -: 2871:    is_nothrow_destructible<_Tp>::value;
+        -: 2872:template <typename _Tp>
+        -: 2873:  inline constexpr bool has_virtual_destructor_v =
+        -: 2874:    has_virtual_destructor<_Tp>::value;
+        -: 2875:template <typename _Tp>
+        -: 2876:  inline constexpr size_t alignment_of_v = alignment_of<_Tp>::value;
+        -: 2877:template <typename _Tp>
+        -: 2878:  inline constexpr size_t rank_v = rank<_Tp>::value;
+        -: 2879:template <typename _Tp, unsigned _Idx = 0>
+        -: 2880:  inline constexpr size_t extent_v = extent<_Tp, _Idx>::value;
+        -: 2881:template <typename _Tp, typename _Up>
+        -: 2882:  inline constexpr bool is_same_v = is_same<_Tp, _Up>::value;
+        -: 2883:template <typename _Base, typename _Derived>
+        -: 2884:  inline constexpr bool is_base_of_v = is_base_of<_Base, _Derived>::value;
+        -: 2885:template <typename _From, typename _To>
+        -: 2886:  inline constexpr bool is_convertible_v = is_convertible<_From, _To>::value;
+        -: 2887:
+        -: 2888:#if __GNUC__ >= 7
+        -: 2889:# define _GLIBCXX_HAVE_BUILTIN_HAS_UNIQ_OBJ_REP 1
+        -: 2890:#elif defined(__is_identifier)
+        -: 2891:// For non-GNU compilers:
+        -: 2892:# if ! __is_identifier(__has_unique_object_representations)
+        -: 2893:#  define _GLIBCXX_HAVE_BUILTIN_HAS_UNIQ_OBJ_REP 1
+        -: 2894:# endif
+        -: 2895:#endif
+        -: 2896:
+        -: 2897:#ifdef _GLIBCXX_HAVE_BUILTIN_HAS_UNIQ_OBJ_REP
+        -: 2898:# define __cpp_lib_has_unique_object_representations 201606
+        -: 2899:  /// has_unique_object_representations
+        -: 2900:  template<typename _Tp>
+        -: 2901:    struct has_unique_object_representations
+        -: 2902:    : bool_constant<__has_unique_object_representations(
+        -: 2903:      remove_cv_t<remove_all_extents_t<_Tp>>
+        -: 2904:      )>
+        -: 2905:    { };
+        -: 2906:
+        -: 2907:  template<typename _Tp>
+        -: 2908:    inline constexpr bool has_unique_object_representations_v
+        -: 2909:      = has_unique_object_representations<_Tp>::value;
+        -: 2910:#endif
+        -: 2911:#undef _GLIBCXX_HAVE_BUILTIN_HAS_UNIQ_OBJ_REP
+        -: 2912:
+        -: 2913:#if __GNUC__ >= 7
+        -: 2914:# define _GLIBCXX_HAVE_BUILTIN_IS_AGGREGATE 1
+        -: 2915:#elif defined(__is_identifier)
+        -: 2916:// For non-GNU compilers:
+        -: 2917:# if ! __is_identifier(__is_aggregate)
+        -: 2918:#  define _GLIBCXX_HAVE_BUILTIN_IS_AGGREGATE 1
+        -: 2919:# endif
+        -: 2920:#endif
+        -: 2921:
+        -: 2922:#ifdef _GLIBCXX_HAVE_BUILTIN_IS_AGGREGATE
+        -: 2923:#define __cpp_lib_is_aggregate 201703
+        -: 2924:  /// is_aggregate
+        -: 2925:  template<typename _Tp>
+        -: 2926:    struct is_aggregate
+        -: 2927:    : bool_constant<__is_aggregate(remove_cv_t<_Tp>)> { };
+        -: 2928:
+        -: 2929:  /// is_aggregate_v
+        -: 2930:  template<typename _Tp>
+        -: 2931:    inline constexpr bool is_aggregate_v = is_aggregate<_Tp>::value;
+        -: 2932:#endif
+        -: 2933:#undef _GLIBCXX_HAVE_BUILTIN_IS_AGGREGATE
+        -: 2934:
+        -: 2935:#endif // C++17
+        -: 2936:
+        -: 2937:#if __cplusplus > 201703L
+        -: 2938:  /// Byte order
+        -: 2939:  enum class endian
+        -: 2940:  {
+        -: 2941:    little = __ORDER_LITTLE_ENDIAN__,
+        -: 2942:    big    = __ORDER_BIG_ENDIAN__,
+        -: 2943:    native = __BYTE_ORDER__
+        -: 2944:  };
+        -: 2945:#endif // C++2a
+        -: 2946:
+        -: 2947:_GLIBCXX_END_NAMESPACE_VERSION
+        -: 2948:} // namespace std
+        -: 2949:
+        -: 2950:#endif  // C++11
+        -: 2951:
+        -: 2952:#endif  // _GLIBCXX_TYPE_TRAITS

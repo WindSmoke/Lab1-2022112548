@@ -1,0 +1,337 @@
+        -:    0:Source:C:/Users/windSmoke/Desktop/lab3/white/test_main.cpp
+        -:    0:Programs:1
+        -:    1:#include "gtest/gtest.h"
+        -:    2:#include "graph_analyzer.h" // 包含你的函数定义
+        -:    3:
+        -:    4:// 你需要在你的 main.cpp 中定义 graph 变量，或者在这里直接定义（如果你的所有代码都在一起）
+        -:    5:// 为了测试独立性，通常会在测试前 setup 图
+        -:    6:
+        -:    7:// 假设你的 graph 变量是全局的，并且在 build_directed_graph 中被修改
+        -:    8:// 在每个测试开始前，我们需要清除并重建图，以确保测试的独立性。
+        -:    9:// 可以通过在测试夹具（Test Fixture）中实现 SetUp 方法来完成。
+        -:   10:
+        -:   11:// 定义一个测试夹具
+        -:   12:class QueryBridgeWordsTest : public ::testing::Test {
+        -:   13:protected:
+        4:   14:    void SetUp() override {
+        -:   15:        // 在每个测试用例运行前执行
+        -:   16:        // 清空全局图变量，然后构建一个简单的图用于测试
+        4:   17:        graph.clear();
+        8:   18:        std::string test_text = "new york new jersey new city";
+        -:   19:        // 注意：build_directed_graph 返回一个引用，但我们这里只是调用它来填充全局的 graph 变量
+        4:   20:        build_directed_graph(test_text);
+        4:   21:    }
+------------------
+_ZN20QueryBridgeWordsTest5SetUpEv:
+------------------
+_ZN20QueryBridgeWordsTest5SetUpEv:
+------------------
+        -:   22:
+        4:   23:    void TearDown() override {
+        -:   24:        // 在每个测试用例运行后执行（可选，这里不需要特别清理）
+        4:   25:    }
+------------------
+_ZN20QueryBridgeWordsTest8TearDownEv:
+------------------
+_ZN20QueryBridgeWordsTest8TearDownEv:
+------------------
+        -:   26:};
+        -:   27:
+        -:   28:// Test Case 1: Word1 not in graph
+        8:   29:TEST_F(QueryBridgeWordsTest, Word1NotInGraph) {
+        2:   30:    std::string word1 = "london"; // 不在图中的词
+        2:   31:    std::string word2 = "york";   // 在图中的词
+        2:   32:    std::vector<std::string> bridge_words = queryBridgeWords(word1, word2);
+       2*:   33:    ASSERT_TRUE(bridge_words.empty()); // 期望结果为空
+        -:   34:}
+------------------
+_ZN41QueryBridgeWordsTest_Word1NotInGraph_TestC1Ev:
+        1:   29:TEST_F(QueryBridgeWordsTest, Word1NotInGraph) {
+------------------
+_ZN41QueryBridgeWordsTest_Word1NotInGraph_TestD0Ev:
+        1:   29:TEST_F(QueryBridgeWordsTest, Word1NotInGraph) {
+------------------
+_ZN41QueryBridgeWordsTest_Word1NotInGraph_TestD1Ev:
+        1:   29:TEST_F(QueryBridgeWordsTest, Word1NotInGraph) {
+------------------
+_ZN41QueryBridgeWordsTest_Word1NotInGraph_Test8TestBodyEv:
+        1:   29:TEST_F(QueryBridgeWordsTest, Word1NotInGraph) {
+        1:   30:    std::string word1 = "london"; // 不在图中的词
+        1:   31:    std::string word2 = "york";   // 在图中的词
+        1:   32:    std::vector<std::string> bridge_words = queryBridgeWords(word1, word2);
+       1*:   33:    ASSERT_TRUE(bridge_words.empty()); // 期望结果为空
+        -:   34:}
+------------------
+_ZN41QueryBridgeWordsTest_Word1NotInGraph_TestC1Ev:
+        1:   29:TEST_F(QueryBridgeWordsTest, Word1NotInGraph) {
+------------------
+_ZN41QueryBridgeWordsTest_Word1NotInGraph_TestD0Ev:
+        1:   29:TEST_F(QueryBridgeWordsTest, Word1NotInGraph) {
+------------------
+_ZN41QueryBridgeWordsTest_Word1NotInGraph_TestD1Ev:
+        1:   29:TEST_F(QueryBridgeWordsTest, Word1NotInGraph) {
+------------------
+_ZN41QueryBridgeWordsTest_Word1NotInGraph_Test8TestBodyEv:
+        1:   29:TEST_F(QueryBridgeWordsTest, Word1NotInGraph) {
+        1:   30:    std::string word1 = "london"; // 不在图中的词
+        1:   31:    std::string word2 = "york";   // 在图中的词
+        1:   32:    std::vector<std::string> bridge_words = queryBridgeWords(word1, word2);
+       1*:   33:    ASSERT_TRUE(bridge_words.empty()); // 期望结果为空
+        -:   34:}
+------------------
+        -:   35:
+        -:   36:// Test Case 2: Word2 not in graph
+        8:   37:TEST_F(QueryBridgeWordsTest, Word2NotInGraph) {
+        2:   38:    std::string word1 = "new";      // 在图中的词
+        2:   39:    std::string word2 = "paris";    // 不在图中的词
+        2:   40:    std::vector<std::string> bridge_words = queryBridgeWords(word1, word2);
+       2*:   41:    ASSERT_TRUE(bridge_words.empty()); // 期望结果为空
+        -:   42:}
+------------------
+_ZN41QueryBridgeWordsTest_Word2NotInGraph_TestC1Ev:
+        1:   37:TEST_F(QueryBridgeWordsTest, Word2NotInGraph) {
+------------------
+_ZN41QueryBridgeWordsTest_Word2NotInGraph_TestD0Ev:
+        1:   37:TEST_F(QueryBridgeWordsTest, Word2NotInGraph) {
+------------------
+_ZN41QueryBridgeWordsTest_Word2NotInGraph_TestD1Ev:
+        1:   37:TEST_F(QueryBridgeWordsTest, Word2NotInGraph) {
+------------------
+_ZN41QueryBridgeWordsTest_Word2NotInGraph_Test8TestBodyEv:
+        1:   37:TEST_F(QueryBridgeWordsTest, Word2NotInGraph) {
+        1:   38:    std::string word1 = "new";      // 在图中的词
+        1:   39:    std::string word2 = "paris";    // 不在图中的词
+        1:   40:    std::vector<std::string> bridge_words = queryBridgeWords(word1, word2);
+       1*:   41:    ASSERT_TRUE(bridge_words.empty()); // 期望结果为空
+        -:   42:}
+------------------
+_ZN41QueryBridgeWordsTest_Word2NotInGraph_TestC1Ev:
+        1:   37:TEST_F(QueryBridgeWordsTest, Word2NotInGraph) {
+------------------
+_ZN41QueryBridgeWordsTest_Word2NotInGraph_TestD0Ev:
+        1:   37:TEST_F(QueryBridgeWordsTest, Word2NotInGraph) {
+------------------
+_ZN41QueryBridgeWordsTest_Word2NotInGraph_TestD1Ev:
+        1:   37:TEST_F(QueryBridgeWordsTest, Word2NotInGraph) {
+------------------
+_ZN41QueryBridgeWordsTest_Word2NotInGraph_Test8TestBodyEv:
+        1:   37:TEST_F(QueryBridgeWordsTest, Word2NotInGraph) {
+        1:   38:    std::string word1 = "new";      // 在图中的词
+        1:   39:    std::string word2 = "paris";    // 不在图中的词
+        1:   40:    std::vector<std::string> bridge_words = queryBridgeWords(word1, word2);
+       1*:   41:    ASSERT_TRUE(bridge_words.empty()); // 期望结果为空
+        -:   42:}
+------------------
+        -:   43:
+        -:   44:// Test Case 3: Both words in graph, but no bridge words
+        8:   45:TEST_F(QueryBridgeWordsTest, NoBridgeWordsExist) {
+        -:   46:    // 文本 "new york new jersey new city" 构建的图
+        -:   47:    // new -> york (1)
+        -:   48:    // york -> new (1)
+        -:   49:    // new -> jersey (1)
+        -:   50:    // jersey -> new (1)
+        -:   51:    // new -> city (1)
+        -:   52:
+        2:   53:    std::string word1 = "city";
+        2:   54:    std::string word2 = "jersey";
+        -:   55:    // 从 york 到 jersey 没有桥接词 (york -> X -> jersey)
+        2:   56:    std::vector<std::string> bridge_words = queryBridgeWords(word1, word2);
+       2*:   57:    ASSERT_TRUE(bridge_words.empty()); // 期望结果为空
+        -:   58:}
+------------------
+_ZN44QueryBridgeWordsTest_NoBridgeWordsExist_TestC1Ev:
+        1:   45:TEST_F(QueryBridgeWordsTest, NoBridgeWordsExist) {
+------------------
+_ZN44QueryBridgeWordsTest_NoBridgeWordsExist_TestD0Ev:
+        1:   45:TEST_F(QueryBridgeWordsTest, NoBridgeWordsExist) {
+------------------
+_ZN44QueryBridgeWordsTest_NoBridgeWordsExist_TestD1Ev:
+        1:   45:TEST_F(QueryBridgeWordsTest, NoBridgeWordsExist) {
+------------------
+_ZN44QueryBridgeWordsTest_NoBridgeWordsExist_Test8TestBodyEv:
+        1:   45:TEST_F(QueryBridgeWordsTest, NoBridgeWordsExist) {
+        -:   46:    // 文本 "new york new jersey new city" 构建的图
+        -:   47:    // new -> york (1)
+        -:   48:    // york -> new (1)
+        -:   49:    // new -> jersey (1)
+        -:   50:    // jersey -> new (1)
+        -:   51:    // new -> city (1)
+        -:   52:
+        1:   53:    std::string word1 = "city";
+        1:   54:    std::string word2 = "jersey";
+        -:   55:    // 从 york 到 jersey 没有桥接词 (york -> X -> jersey)
+        1:   56:    std::vector<std::string> bridge_words = queryBridgeWords(word1, word2);
+       1*:   57:    ASSERT_TRUE(bridge_words.empty()); // 期望结果为空
+        -:   58:}
+------------------
+_ZN44QueryBridgeWordsTest_NoBridgeWordsExist_TestC1Ev:
+        1:   45:TEST_F(QueryBridgeWordsTest, NoBridgeWordsExist) {
+------------------
+_ZN44QueryBridgeWordsTest_NoBridgeWordsExist_TestD0Ev:
+        1:   45:TEST_F(QueryBridgeWordsTest, NoBridgeWordsExist) {
+------------------
+_ZN44QueryBridgeWordsTest_NoBridgeWordsExist_TestD1Ev:
+        1:   45:TEST_F(QueryBridgeWordsTest, NoBridgeWordsExist) {
+------------------
+_ZN44QueryBridgeWordsTest_NoBridgeWordsExist_Test8TestBodyEv:
+        1:   45:TEST_F(QueryBridgeWordsTest, NoBridgeWordsExist) {
+        -:   46:    // 文本 "new york new jersey new city" 构建的图
+        -:   47:    // new -> york (1)
+        -:   48:    // york -> new (1)
+        -:   49:    // new -> jersey (1)
+        -:   50:    // jersey -> new (1)
+        -:   51:    // new -> city (1)
+        -:   52:
+        1:   53:    std::string word1 = "city";
+        1:   54:    std::string word2 = "jersey";
+        -:   55:    // 从 york 到 jersey 没有桥接词 (york -> X -> jersey)
+        1:   56:    std::vector<std::string> bridge_words = queryBridgeWords(word1, word2);
+       1*:   57:    ASSERT_TRUE(bridge_words.empty()); // 期望结果为空
+        -:   58:}
+------------------
+        -:   59:
+        -:   60:// Test Case 4: Single bridge word exists
+        8:   61:TEST_F(QueryBridgeWordsTest, SingleBridgeWord) {
+        -:   62:    // 文本 "new york new jersey new city"
+        -:   63:    // new -> york, york -> new
+        -:   64:    // new -> jersey, jersey -> new
+        -:   65:    // new -> city
+        -:   66:
+        2:   67:    std::string word1 = "new";
+        2:   68:    std::string word2 = "new"; // 查找 "new -> X -> new"
+        2:   69:    std::vector<std::string> bridge_words = queryBridgeWords(word1, word2);
+        -:   70:    // 期望的桥接词是 "york" 和 "jersey"
+        -:   71:    // 注意：queryBridgeWords 函数的输出顺序不确定，所以需要检查内容
+       2*:   72:    ASSERT_EQ(bridge_words.size(), 2);
+       2*:   73:    ASSERT_NE(std::find(bridge_words.begin(), bridge_words.end(), "york"), bridge_words.end());
+       2*:   74:    ASSERT_NE(std::find(bridge_words.begin(), bridge_words.end(), "jersey"), bridge_words.end());
+        -:   75:}
+------------------
+_ZN42QueryBridgeWordsTest_SingleBridgeWord_TestC1Ev:
+        1:   61:TEST_F(QueryBridgeWordsTest, SingleBridgeWord) {
+------------------
+_ZN42QueryBridgeWordsTest_SingleBridgeWord_TestD0Ev:
+        1:   61:TEST_F(QueryBridgeWordsTest, SingleBridgeWord) {
+------------------
+_ZN42QueryBridgeWordsTest_SingleBridgeWord_TestD1Ev:
+        1:   61:TEST_F(QueryBridgeWordsTest, SingleBridgeWord) {
+------------------
+_ZN42QueryBridgeWordsTest_SingleBridgeWord_Test8TestBodyEv:
+        1:   61:TEST_F(QueryBridgeWordsTest, SingleBridgeWord) {
+        -:   62:    // 文本 "new york new jersey new city"
+        -:   63:    // new -> york, york -> new
+        -:   64:    // new -> jersey, jersey -> new
+        -:   65:    // new -> city
+        -:   66:
+        1:   67:    std::string word1 = "new";
+        1:   68:    std::string word2 = "new"; // 查找 "new -> X -> new"
+        1:   69:    std::vector<std::string> bridge_words = queryBridgeWords(word1, word2);
+        -:   70:    // 期望的桥接词是 "york" 和 "jersey"
+        -:   71:    // 注意：queryBridgeWords 函数的输出顺序不确定，所以需要检查内容
+       1*:   72:    ASSERT_EQ(bridge_words.size(), 2);
+       1*:   73:    ASSERT_NE(std::find(bridge_words.begin(), bridge_words.end(), "york"), bridge_words.end());
+       1*:   74:    ASSERT_NE(std::find(bridge_words.begin(), bridge_words.end(), "jersey"), bridge_words.end());
+        -:   75:}
+------------------
+_ZN42QueryBridgeWordsTest_SingleBridgeWord_TestC1Ev:
+        1:   61:TEST_F(QueryBridgeWordsTest, SingleBridgeWord) {
+------------------
+_ZN42QueryBridgeWordsTest_SingleBridgeWord_TestD0Ev:
+        1:   61:TEST_F(QueryBridgeWordsTest, SingleBridgeWord) {
+------------------
+_ZN42QueryBridgeWordsTest_SingleBridgeWord_TestD1Ev:
+        1:   61:TEST_F(QueryBridgeWordsTest, SingleBridgeWord) {
+------------------
+_ZN42QueryBridgeWordsTest_SingleBridgeWord_Test8TestBodyEv:
+        1:   61:TEST_F(QueryBridgeWordsTest, SingleBridgeWord) {
+        -:   62:    // 文本 "new york new jersey new city"
+        -:   63:    // new -> york, york -> new
+        -:   64:    // new -> jersey, jersey -> new
+        -:   65:    // new -> city
+        -:   66:
+        1:   67:    std::string word1 = "new";
+        1:   68:    std::string word2 = "new"; // 查找 "new -> X -> new"
+        1:   69:    std::vector<std::string> bridge_words = queryBridgeWords(word1, word2);
+        -:   70:    // 期望的桥接词是 "york" 和 "jersey"
+        -:   71:    // 注意：queryBridgeWords 函数的输出顺序不确定，所以需要检查内容
+       1*:   72:    ASSERT_EQ(bridge_words.size(), 2);
+       1*:   73:    ASSERT_NE(std::find(bridge_words.begin(), bridge_words.end(), "york"), bridge_words.end());
+       1*:   74:    ASSERT_NE(std::find(bridge_words.begin(), bridge_words.end(), "jersey"), bridge_words.end());
+        -:   75:}
+------------------
+        -:   76:
+        -:   77:// Test Case 5: Multiple bridge words exist (using a different text for clarity)
+        -:   78:class QueryBridgeWordsMultipleTest : public ::testing::Test {
+        -:   79:protected:
+        1:   80:    void SetUp() override {
+        1:   81:        graph.clear();
+        2:   82:        std::string test_text = "life is good good life is beautiful";
+        -:   83:        // 构建的图 (部分):
+        -:   84:        // life -> is
+        -:   85:        // is -> good
+        -:   86:        // good -> good
+        -:   87:        // good -> life
+        -:   88:        // life -> is
+        -:   89:        // is -> beautiful
+        1:   90:        build_directed_graph(test_text);
+        1:   91:    }
+------------------
+_ZN28QueryBridgeWordsMultipleTest5SetUpEv:
+------------------
+_ZN28QueryBridgeWordsMultipleTest5SetUpEv:
+------------------
+        -:   92:};
+        -:   93:
+        8:   94:TEST_F(QueryBridgeWordsMultipleTest, MultipleBridgeWords) {
+        2:   95:    std::string word1 = "is";
+        2:   96:    std::string word2 = "life";
+        -:   97:    // 期望的桥接词：is -> good -> life
+        2:   98:    std::vector<std::string> bridge_words = queryBridgeWords(word1, word2);
+       2*:   99:    ASSERT_EQ(bridge_words.size(), 1);
+       2*:  100:    ASSERT_EQ(bridge_words[0], "good");
+        -:  101:}
+------------------
+_ZN53QueryBridgeWordsMultipleTest_MultipleBridgeWords_TestC1Ev:
+        1:   94:TEST_F(QueryBridgeWordsMultipleTest, MultipleBridgeWords) {
+------------------
+_ZN53QueryBridgeWordsMultipleTest_MultipleBridgeWords_TestD0Ev:
+        1:   94:TEST_F(QueryBridgeWordsMultipleTest, MultipleBridgeWords) {
+------------------
+_ZN53QueryBridgeWordsMultipleTest_MultipleBridgeWords_TestD1Ev:
+        1:   94:TEST_F(QueryBridgeWordsMultipleTest, MultipleBridgeWords) {
+------------------
+_ZN53QueryBridgeWordsMultipleTest_MultipleBridgeWords_Test8TestBodyEv:
+        1:   94:TEST_F(QueryBridgeWordsMultipleTest, MultipleBridgeWords) {
+        1:   95:    std::string word1 = "is";
+        1:   96:    std::string word2 = "life";
+        -:   97:    // 期望的桥接词：is -> good -> life
+        1:   98:    std::vector<std::string> bridge_words = queryBridgeWords(word1, word2);
+       1*:   99:    ASSERT_EQ(bridge_words.size(), 1);
+       1*:  100:    ASSERT_EQ(bridge_words[0], "good");
+        -:  101:}
+------------------
+_ZN53QueryBridgeWordsMultipleTest_MultipleBridgeWords_TestC1Ev:
+        1:   94:TEST_F(QueryBridgeWordsMultipleTest, MultipleBridgeWords) {
+------------------
+_ZN53QueryBridgeWordsMultipleTest_MultipleBridgeWords_TestD0Ev:
+        1:   94:TEST_F(QueryBridgeWordsMultipleTest, MultipleBridgeWords) {
+------------------
+_ZN53QueryBridgeWordsMultipleTest_MultipleBridgeWords_TestD1Ev:
+        1:   94:TEST_F(QueryBridgeWordsMultipleTest, MultipleBridgeWords) {
+------------------
+_ZN53QueryBridgeWordsMultipleTest_MultipleBridgeWords_Test8TestBodyEv:
+        1:   94:TEST_F(QueryBridgeWordsMultipleTest, MultipleBridgeWords) {
+        1:   95:    std::string word1 = "is";
+        1:   96:    std::string word2 = "life";
+        -:   97:    // 期望的桥接词：is -> good -> life
+        1:   98:    std::vector<std::string> bridge_words = queryBridgeWords(word1, word2);
+       1*:   99:    ASSERT_EQ(bridge_words.size(), 1);
+       1*:  100:    ASSERT_EQ(bridge_words[0], "good");
+        -:  101:}
+------------------
+        -:  102:
+        -:  103:// Main function for running tests
+        6:  104:int main(int argc, char **argv) {
+        6:  105:    ::testing::InitGoogleTest(&argc, argv);
+        6:  106:    return RUN_ALL_TESTS();
+        -:  107:}

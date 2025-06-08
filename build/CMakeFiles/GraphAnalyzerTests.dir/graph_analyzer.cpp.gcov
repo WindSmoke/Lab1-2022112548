@@ -1,0 +1,835 @@
+        -:    0:Source:C:/Users/windSmoke/Desktop/lab3/white/graph_analyzer.cpp
+        -:    0:Graph:.\graph_analyzer.cpp.gcno
+        -:    0:Data:.\graph_analyzer.cpp.gcda
+        -:    0:Runs:6
+        -:    0:Programs:1
+        -:    1:#include <iostream>
+        -:    2:#include <fstream>
+        -:    3:#include <string>
+        -:    4:#include <vector>
+        -:    5:#include <sstream>
+        -:    6:#include <unordered_map>
+        -:    7:#include <unordered_set>
+        -:    8:#include <regex>
+        -:    9:#include <random>
+        -:   10:#include <queue>
+        -:   11:#include <limits>
+        -:   12:#include <iomanip>
+        -:   13:#include <algorithm>
+        -:   14:#include <map>
+        -:   15:#include <cmath>
+        -:   16:#include <set>
+        -:   17:#include "graph_analyzer.h"
+        -:   18://NOW i am make some changes
+        -:   19://change in C4
+        -:   20://change in B1
+        -:   21://second change
+        -:   22://change1
+        -:   23:using namespace std;
+        -:   24:
+        -:   25:// 全局图变量
+        -:   26:unordered_map<string, unordered_map<string, int>> graph;
+        -:   27:
+        -:   28:// 文本预处理函数
+        5:   29:string text_pre_process(const string& text) {
+        -:   30:    // 将换行符和回车符替换为空格
+        5:   31:    string processed_text = regex_replace(text, regex("[\n\r]"), " ");
+        -:   32:
+        -:   33:    // 使用正则表达式替换所有标点符号为空格，并删除非字母字符
+        5:   34:    processed_text = regex_replace(processed_text, regex("[^a-zA-Z\\s]"), " ");
+        -:   35:
+        -:   36:    // 去除多余的空格（例如多个空格被替换为一个空格）
+        5:   37:    processed_text = regex_replace(processed_text, regex("\\s+"), " ");
+        -:   38:
+        -:   39:    // 去除首尾空格并将所有字符转换为小写
+        5:   40:    processed_text = regex_replace(processed_text, regex("^\\s+|\\s+$"), "");
+        5:   41:    transform(processed_text.begin(), processed_text.end(), processed_text.begin(), ::tolower);
+        5:   42:    processed_text = regex_replace(processed_text, regex("[^\\w\\s]"), "");
+        -:   43:
+        5:   44:    return processed_text;
+        -:   45:}
+        -:   46:
+        -:   47:// 读取文件内容函数
+    #####:   48:string read_file(const string& file_path) {
+    #####:   49:    ifstream file(file_path);
+    #####:   50:    if (file.is_open()) {
+    #####:   51:        stringstream buffer;
+    #####:   52:        buffer << file.rdbuf();
+    #####:   53:        file.close();
+    #####:   54:        return buffer.str();
+        -:   55:    } else {
+    #####:   56:        return "Error: The file at " + file_path + " was not found.";
+        -:   57:    }
+        -:   58:}
+        5:   59:unordered_map<string, unordered_map<string, int>>& build_directed_graph(const string& text) {
+       10:   60:    string processed_text = text_pre_process(text);
+       10:   61:    stringstream ss(processed_text);
+       10:   62:    string word;
+        5:   63:    vector<string> words;
+       36:   64:    while (ss >> word) {
+       31:   65:        words.push_back(word);
+        -:   66:    }
+        -:   67:
+        5:   68:    graph.clear(); // 清空之前的图
+        -:   69:
+        -:   70:    // 遍历单词列表，构建有向图
+       31:   71:    for (size_t i = 0; i < words.size() - 1; ++i) {
+       52:   72:        string word_a = words[i];
+       26:   73:        string word_b = words[i + 1];
+        -:   74:
+        -:   75:        // 确保每个单词都被添加为图的节点
+       26:   76:        graph[word_a]; // 如果 word_a 没有出现在图中，它将被初始化为一个空的 unordered_map
+       26:   77:        graph[word_b]; // 同上
+        -:   78:
+        -:   79:        // 增加A->B的边权重
+       26:   80:        graph[word_a][word_b]++;
+        -:   81:    }
+        -:   82:
+       10:   83:    return graph;
+        -:   84:}
+        -:   85:
+        -:   86:// 展示有向图 (需要第三方库，此处简化为打印节点和边)
+    #####:   87:void showDirectedGraph(const unordered_map<string, unordered_map<string, int>>& graph) {
+    #####:   88:    cout << "Directed Graph:" << endl;
+    #####:   89:    for (const auto& pair : graph) {
+    #####:   90:        cout << "Node: " << pair.first << " -> ";
+    #####:   91:        for (const auto& neighbor_pair : pair.second) {
+    #####:   92:            cout << neighbor_pair.first << "(" << neighbor_pair.second << ") ";
+        -:   93:        }
+    #####:   94:        cout << endl;
+        -:   95:    }
+    #####:   96:}
+        -:   97:
+        -:   98:// 查询桥接词函数
+        5:   99:vector<string> queryBridgeWords(const string& word1, const string& word2) {
+        5:  100:    if (graph.find(word1) == graph.end() || graph.find(word2) == graph.end()) {
+        2:  101:        cout << "No word1 in the graph!" << endl;
+        2:  102:        return {};
+        -:  103:    }
+       3*:  104:    if (graph.find(word1) == graph.end() || graph.find(word2) == graph.end()) {
+    #####:  105:        cout << " word2 in the graph!" << endl;
+    #####:  106:        return {};
+        -:  107:    }
+        -:  108:
+        6:  109:    vector<string> bridge_words;
+        -:  110:
+        -:  111:    // 遍历图，查找满足条件的桥接词
+       15:  112:    for (const auto& pair : graph) {
+       12:  113:        const string& word3 = pair.first;
+       12:  114:        if (graph.at(word1).count(word3) > 0 && graph.count(word3) > 0 && graph.at(word3).count(word2) > 0) {
+        3:  115:            bridge_words.push_back(word3);
+        -:  116:        }
+        -:  117:    }
+        -:  118:
+        -:  119:    // 根据找到的桥接词数量输出结果
+        3:  120:    if (!bridge_words.empty()) {
+        2:  121:        cout << "The bridge words from " << word1 << " to " << word2 << " are: ";
+        5:  122:        for (size_t i = 0; i < bridge_words.size(); ++i) {
+        3:  123:            cout << bridge_words[i] << (i == bridge_words.size() - 1 ? "." : ", ");
+        -:  124:        }
+        2:  125:        cout << endl;
+        -:  126:    } else {
+        1:  127:        cout << "No bridge words from " << word1 << " to " << word2 << "!" << endl;
+        -:  128:    }
+        -:  129:
+        3:  130:    return bridge_words;
+        -:  131:}
+        -:  132:
+        -:  133:// 生成新文本函数
+    #####:  134:string generateNewText(const string& inputText) {
+    #####:  135:    stringstream ss(inputText);
+    #####:  136:    string word;
+    #####:  137:    vector<string> words;
+    #####:  138:    while (ss >> word) {
+    #####:  139:        words.push_back(word);
+        -:  140:    }
+        -:  141:
+    #####:  142:    vector<string> new_words;
+    #####:  143:    random_device rd;
+    #####:  144:    mt19937 gen(rd());
+        -:  145:
+        -:  146:    // 遍历相邻的单词
+    #####:  147:    for (size_t i = 0; i < words.size() - 1; ++i) {
+    #####:  148:        string word1 = words[i];
+    #####:  149:        string word2 = words[i + 1];
+        -:  150:
+        -:  151:        // 查找这对单词的桥接词
+    #####:  152:        vector<string> bridge_words = queryBridgeWords(word1, word2);
+        -:  153:
+        -:  154:        // 如果存在桥接词，随机选择一个并插入
+    #####:  155:        if (!bridge_words.empty()) {
+    #####:  156:            uniform_int_distribution<> distrib(0, bridge_words.size() - 1);
+    #####:  157:            string bridge_word = bridge_words[distrib(gen)];
+    #####:  158:            new_words.push_back(word1);
+    #####:  159:            new_words.push_back(bridge_word);
+        -:  160:        } else {
+    #####:  161:            new_words.push_back(word1);
+        -:  162:        }
+        -:  163:
+        -:  164:        // 对于最后一个单词，直接添加到新文本中
+    #####:  165:        if (i == words.size() - 2) {
+    #####:  166:            new_words.push_back(word2);
+        -:  167:        }
+        -:  168:    }
+        -:  169:
+        -:  170:    // 将处理后的单词列表重新拼接成文本
+    #####:  171:    stringstream result_ss;
+    #####:  172:    for (const string& w : new_words) {
+    #####:  173:        result_ss << w << " ";
+        -:  174:    }
+    #####:  175:    string result = result_ss.str();
+    #####:  176:    if (!result.empty()) {
+    #####:  177:        result.pop_back(); // Remove trailing space
+        -:  178:    }
+    #####:  179:    return result;
+        -:  180:}
+        -:  181:
+        -:  182:// Dijkstra算法函数
+    #####:  183:pair<vector<string>, int> dijkstra(const string& start, const string& end) {
+    #####:  184:    unordered_map<string, int> distances;
+    #####:  185:    unordered_map<string, string> previous_nodes;
+    #####:  186:    priority_queue<pair<int, string>, vector<pair<int, string>>, greater<pair<int, string>>> priority_queue;
+        -:  187:
+    #####:  188:    for (const auto& node_pair : graph) {
+    #####:  189:        distances[node_pair.first] = numeric_limits<int>::max();
+        -:  190:    }
+    #####:  191:    distances[start] = 0;
+    #####:  192:    priority_queue.push({0, start});
+        -:  193:
+    #####:  194:    while (!priority_queue.empty()) {
+    #####:  195:        int current_distance = priority_queue.top().first;
+    #####:  196:        string current_node = priority_queue.top().second;
+    #####:  197:        priority_queue.pop();
+        -:  198:
+    #####:  199:        if (current_distance > distances[current_node]) {
+    #####:  200:            continue;
+        -:  201:        }
+        -:  202:
+    #####:  203:        if (graph.count(current_node)) {
+    #####:  204:            for (const auto& neighbor_pair : graph.at(current_node)) {
+    #####:  205:                string neighbor = neighbor_pair.first;
+    #####:  206:                int weight = neighbor_pair.second;
+    #####:  207:                int distance = current_distance + weight;
+    #####:  208:                if (distance < distances[neighbor]) {
+    #####:  209:                    distances[neighbor] = distance;
+    #####:  210:                    previous_nodes[neighbor] = current_node;
+    #####:  211:                    priority_queue.push({distance, neighbor});
+        -:  212:                }
+        -:  213:            }
+        -:  214:        }
+        -:  215:    }
+        -:  216:
+    #####:  217:    if (distances[end] == numeric_limits<int>::max()) {
+    #####:  218:        return {{}, -1}; // 返回空路径和-1表示不可达
+        -:  219:    }
+        -:  220:
+    #####:  221:    vector<string> path;
+    #####:  222:    string current = end;
+    #####:  223:    while (current != "") {
+    #####:  224:        path.push_back(current);
+    #####:  225:        if (previous_nodes.find(current) == previous_nodes.end()) {
+    #####:  226:            break;
+        -:  227:        }
+    #####:  228:        current = previous_nodes[current];
+        -:  229:    }
+    #####:  230:    reverse(path.begin(), path.end());
+    #####:  231:    return {path, distances[end]};
+        -:  232:}
+        -:  233:
+        -:  234:// 计算最短路径函数
+    #####:  235:void calcShortestPath(const string& word1, const string& word2) {
+    #####:  236:    if (graph.find(word1) == graph.end() || graph.find(word2) == graph.end()) {
+    #####:  237:        cout << "No word1 or word2 in the graph!" << endl;
+    #####:  238:        return;
+        -:  239:    }
+        -:  240:
+    #####:  241:    pair<vector<string>, int> result = dijkstra(word1, word2);
+    #####:  242:    const vector<string>& path = result.first;
+    #####:  243:    int length = result.second;
+        -:  244:
+    #####:  245:    if (length == -1) {
+    #####:  246:        cout << "There is no path from '" << word1 << "' to '" << word2 << "'!" << endl;
+        -:  247:    } else {
+    #####:  248:        cout << "The shortest path from '" << word1 << "' to '" << word2 << "' is: ";
+    #####:  249:        for (size_t i = 0; i < path.size(); ++i) {
+    #####:  250:            cout << path[i] << (i == path.size() - 1 ? "" : " -> ");
+        -:  251:        }
+    #####:  252:        cout << endl;
+    #####:  253:        cout << "The length of the path is: " << length << endl;
+        -:  254:    }
+        -:  255:}
+        -:  256:
+        -:  257:
+        -:  258:// 计算PageRank函数，处理出度为0的节点
+    #####:  259:double calPageRank(const string& word) {
+    #####:  260:    double d = 0.85;
+    #####:  261:    int max_iter = 100;
+    #####:  262:    double tol = 1e-6;
+        -:  263:
+    #####:  264:    unordered_set<string> nodes_set;
+    #####:  265:    for (const auto& pair : graph) {
+    #####:  266:        nodes_set.insert(pair.first);
+    #####:  267:        for (const auto& neighbor_pair : pair.second) {
+    #####:  268:            nodes_set.insert(neighbor_pair.first);
+        -:  269:        }
+        -:  270:    }
+    #####:  271:    vector<string> nodes(nodes_set.begin(), nodes_set.end());
+    #####:  272:    int N = nodes.size();
+        -:  273:
+    #####:  274:    if (N == 0) {
+    #####:  275:        return 0.0;
+        -:  276:    }
+        -:  277:
+    #####:  278:    unordered_map<string, double> pr;
+    #####:  279:    unordered_map<string, int> out_degree;
+        -:  280:
+    #####:  281:    for (const string& node : nodes) {
+    #####:  282:        pr[node] = 1.0 / N;
+    #####:  283:        out_degree[node] = graph.count(node) ? graph.at(node).size() : 0;
+        -:  284:    }
+        -:  285:
+    #####:  286:    for (int iter = 0; iter < max_iter; ++iter) {
+    #####:  287:        unordered_map<string, double> new_pr;
+    #####:  288:        unordered_map<string, double> dangling_pr_sum; // 存储出度为0的节点的PR值
+        -:  289:
+        -:  290:        // 计算每个节点的入链贡献和悬挂节点的PR值
+    #####:  291:        for (const string& node : nodes) {
+    #####:  292:            double inbound_pr_sum = 0;
+    #####:  293:            for (const string& neighbor : nodes) {
+    #####:  294:                if (graph.count(neighbor) && graph.at(neighbor).count(node)) {
+    #####:  295:                    inbound_pr_sum += pr[neighbor] / out_degree[neighbor];
+        -:  296:                }
+        -:  297:            }
+    #####:  298:            new_pr[node] = (1 - d) / N + d * inbound_pr_sum;
+        -:  299:        }
+        -:  300:
+    #####:  301:        double sum_dangling_pr = 0;
+    #####:  302:        for (const string& node : nodes) {
+    #####:  303:            if (out_degree[node] == 0) {
+    #####:  304:                sum_dangling_pr += pr[node];
+        -:  305:            }
+        -:  306:        }
+        -:  307:
+        -:  308:        // 将悬挂节点的PR值均分给所有节点
+    #####:  309:        for (const string& node : nodes) {
+    #####:  310:            new_pr[node] += d * sum_dangling_pr / N;
+        -:  311:        }
+        -:  312:
+    #####:  313:        bool converged = true;
+    #####:  314:        for (const string& node : nodes) {
+    #####:  315:            if (abs(new_pr[node] - pr[node]) > tol) {
+    #####:  316:                converged = false;
+    #####:  317:                break;
+        -:  318:            }
+        -:  319:        }
+    #####:  320:        pr = new_pr;
+    #####:  321:        if (converged) {
+    #####:  322:            break;
+        -:  323:        }
+        -:  324:    }
+        -:  325:
+    #####:  326:    return pr.count(word) ? pr.at(word) : 0.0;
+        -:  327:}
+        -:  328:#include <ctime>
+        -:  329:#include <utility> 
+        -:  330:
+        -:  331:// 随机游走函数
+    #####:  332:void randomWalk() {
+    #####:  333:    string output_file = "walk_output.txt";
+    #####:  334:    set<string> nodes_set;
+    #####:  335:    for (const auto& pair : graph) {
+    #####:  336:        nodes_set.insert(pair.first);
+        -:  337:    }
+    #####:  338:    vector<string> nodes(nodes_set.begin(), nodes_set.end());
+        -:  339:
+    #####:  340:    if (nodes.empty()) {
+    #####:  341:        cout << "The graph is empty, cannot perform random walk." << endl;
+    #####:  342:        return;
+        -:  343:    }
+        -:  344:
+        -:  345:    // 使用当前时间作为随机种子
+    #####:  346:    unsigned seed = static_cast<unsigned>(time(0));  // 获取当前时间的时间戳作为种子
+    #####:  347:    mt19937 gen(seed);  // 使用当前时间作为随机数生成器的种子
+    #####:  348:    uniform_int_distribution<> distrib_node(0, nodes.size() - 1);
+    #####:  349:    string current_node = nodes[distrib_node(gen)];
+        -:  350:
+    #####:  351:    vector<string> visited_nodes;
+    #####:  352:    set<pair<string, string>> visited_edges;
+        -:  353:
+    #####:  354:    ofstream f(output_file);
+    #####:  355:    if (f.is_open()) {
+    #####:  356:        f << "Random walk traversal:" << endl;
+    #####:  357:        f << "Starting from node: " << current_node << endl;
+        -:  358:
+        -:  359:        // 限制随机游走的步数，防止死循环
+    #####:  360:        for (int i = 0; i < 1000000000000000000; ++i) { // 可以根据需要调整步数
+    #####:  361:            visited_nodes.push_back(current_node);
+    #####:  362:            f << current_node << " -> ";
+        -:  363:
+        -:  364:            // 检查当前节点是否有出边
+    #####:  365:            if (!graph.count(current_node) || graph.at(current_node).empty()) {
+    #####:  366:                f << "\nNo outgoing edges from the current node. Stopping the walk." << endl;
+    #####:  367:                break;
+        -:  368:            }
+        -:  369:
+        -:  370:            // 获取当前节点的所有邻居
+    #####:  371:            vector<string> neighbors;
+    #####:  372:            for (const auto& neighbor_pair : graph.at(current_node)) {
+    #####:  373:                neighbors.push_back(neighbor_pair.first);
+        -:  374:            }
+        -:  375:
+        -:  376:            // 随机选择一个邻居节点作为下一个节点
+    #####:  377:            uniform_int_distribution<> distrib_neighbor(0, neighbors.size() - 1);
+    #####:  378:            string next_node = neighbors[distrib_neighbor(gen)];
+    #####:  379:            pair<string, string> edge = {current_node, next_node};
+        -:  380:
+        -:  381:            // 如果这个边已经访问过，停止随机游走
+    #####:  382:            if (visited_edges.count(edge)) {
+    #####:  383:                f << "\nFound a duplicate edge. Stopping the walk." << endl;
+    #####:  384:                break;
+        -:  385:            } else {
+    #####:  386:                visited_edges.insert(edge);
+    #####:  387:                current_node = next_node; // 移动到下一个节点
+        -:  388:            }
+    #####:  389:        }
+        -:  390:
+        -:  391:        // 记录访问过的节点
+    #####:  392:        f << "\nVisited nodes: ";
+    #####:  393:        for (size_t i = 0; i < visited_nodes.size(); ++i) {
+    #####:  394:            f << visited_nodes[i] << (i == visited_nodes.size() - 1 ? "" : " -> ");
+        -:  395:        }
+    #####:  396:        f << endl;
+        -:  397:
+        -:  398:        // 记录访问过的边
+    #####:  399:        f << "Visited edges: ";
+    #####:  400:        int count = 0;
+    #####:  401:        for (const auto& edge : visited_edges) {
+    #####:  402:            f << "(" << edge.first << ", " << edge.second << ")" << (++count == visited_edges.size() ? "" : ", ");
+        -:  403:        }
+    #####:  404:        f << endl;
+        -:  405:
+    #####:  406:        cout << "Random walk completed. Traversal result has been written to " << output_file << endl;
+    #####:  407:        f.close();
+        -:  408:    } else {
+    #####:  409:        cout << "Unable to open file: " << output_file << endl;
+        -:  410:    }
+        -:  411:}
+        -:  412:
+        -:  413:
+        -:  414:
+        -:  415:
+        -:  416:
+        -:  417:
+        -:  418:// 计算 TF (Term Frequency)
+    #####:  419:unordered_map<string, double> calculateTF(const string& text) {
+    #####:  420:    unordered_map<string, int> term_counts;
+    #####:  421:    stringstream ss(text_pre_process(text));
+    #####:  422:    string word;
+    #####:  423:    int total_words = 0;
+    #####:  424:    while (ss >> word) {
+    #####:  425:        term_counts[word]++;
+    #####:  426:        total_words++;
+        -:  427:    }
+    #####:  428:    unordered_map<string, double> tf_scores;
+    #####:  429:    if (total_words > 0) {
+    #####:  430:        for (const auto& pair : term_counts) {
+    #####:  431:            tf_scores[pair.first] = static_cast<double>(pair.second) / total_words;
+        -:  432:        }
+        -:  433:    }
+    #####:  434:    return tf_scores;
+        -:  435:}
+        -:  436:
+        -:  437:// 计算 IDF (Inverse Document Frequency)
+    #####:  438:unordered_map<string, double> calculateIDF(const vector<string>& documents) {
+    #####:  439:    unordered_map<string, int> doc_counts;
+    #####:  440:    int num_documents = documents.size();
+    #####:  441:    unordered_set<string> unique_words_in_doc;
+        -:  442:
+    #####:  443:    for (const string& doc : documents) {
+    #####:  444:        unique_words_in_doc.clear();
+    #####:  445:        stringstream ss(text_pre_process(doc));
+    #####:  446:        string word;
+    #####:  447:        while (ss >> word) {
+    #####:  448:            unique_words_in_doc.insert(word);
+        -:  449:        }
+    #####:  450:        for (const string& w : unique_words_in_doc) {
+    #####:  451:            doc_counts[w]++;
+        -:  452:        }
+        -:  453:    }
+        -:  454:
+    #####:  455:    unordered_map<string, double> idf_scores;
+    #####:  456:    if (num_documents > 0) {
+    #####:  457:        for (const auto& pair : doc_counts) {
+    #####:  458:            idf_scores[pair.first] = log(static_cast<double>(num_documents) / (1 + pair.second));
+        -:  459:        }
+        -:  460:    }
+    #####:  461:    return idf_scores;
+        -:  462:}
+        -:  463:
+        -:  464:// 计算 TF-IDF 权重
+    #####:  465:unordered_map<string, double> calculateTFIDF(const string& document, const vector<string>& all_documents) {
+    #####:  466:    unordered_map<string, double> tf_scores = calculateTF(document);
+    #####:  467:    unordered_map<string, double> idf_scores = calculateIDF(all_documents);
+    #####:  468:    unordered_map<string, double> tfidf_scores;
+    #####:  469:    for (const auto& pair : tf_scores) {
+    #####:  470:        if (idf_scores.count(pair.first)) {
+    #####:  471:            tfidf_scores[pair.first] = pair.second * idf_scores[pair.first];
+        -:  472:        } else {
+    #####:  473:            tfidf_scores[pair.first] = 0.0; // If a term is not in any other document
+        -:  474:        }
+        -:  475:    }
+    #####:  476:    return tfidf_scores;
+        -:  477:}
+        -:  478:
+        -:  479:// 计算PageRank函数，为重要单词分配更高的初始 PR 值 (使用 TF-IDF)
+    #####:  480:double calPageRankWithInitialWeighting(const string& target_word, const vector<string>& all_documents) {
+    #####:  481:    double d = 0.85;
+    #####:  482:    int max_iter = 100;
+    #####:  483:    double tol = 1e-6;
+        -:  484:
+    #####:  485:    unordered_set<string> nodes_set;
+    #####:  486:    for (const auto& pair : graph) {
+    #####:  487:        nodes_set.insert(pair.first);
+    #####:  488:        for (const auto& neighbor_pair : pair.second) {
+    #####:  489:            nodes_set.insert(neighbor_pair.first);
+        -:  490:        }
+        -:  491:    }
+    #####:  492:    vector<string> nodes(nodes_set.begin(), nodes_set.end());
+    #####:  493:    int N = nodes.size();
+        -:  494:
+    #####:  495:    if (N == 0) {
+    #####:  496:        return 0.0;
+        -:  497:    }
+        -:  498:
+        -:  499:    // 计算所有节点（单词）的 TF-IDF 权重
+    #####:  500:    unordered_map<string, double> initial_weights;
+    #####:  501:    for (const string& node : nodes) {
+    #####:  502:        initial_weights[node] = 0.0;
+        -:  503:    }
+        -:  504:
+    #####:  505:    for (const string& doc : all_documents) {
+    #####:  506:        unordered_map<string, double> tfidf = calculateTFIDF(doc, all_documents);
+    #####:  507:        for (const auto& pair : tfidf) {
+    #####:  508:            if (initial_weights.count(pair.first)) {
+    #####:  509:                initial_weights[pair.first] = max(initial_weights[pair.first], pair.second); // 取文档中出现的最大 TF-IDF 值作为初始权重
+        -:  510:            }
+        -:  511:        }
+        -:  512:    }
+        -:  513:
+        -:  514:    // 初始化 PR 值，使用 TF-IDF 作为初始权重
+    #####:  515:    unordered_map<string, double> pr;
+    #####:  516:    unordered_map<string, int> out_degree;
+    #####:  517:    double sum_weights = 0.0;
+    #####:  518:    for (const string& node : nodes) {
+    #####:  519:        sum_weights += initial_weights[node];
+        -:  520:    }
+        -:  521:
+    #####:  522:    for (const string& node : nodes) {
+    #####:  523:        pr[node] = (sum_weights > 0) ? initial_weights[node] / sum_weights : 1.0 / N;
+    #####:  524:        out_degree[node] = graph.count(node) ? graph.at(node).size() : 0;
+        -:  525:    }
+        -:  526:
+    #####:  527:    for (int iter = 0; iter < max_iter; ++iter) {
+    #####:  528:        unordered_map<string, double> new_pr;
+    #####:  529:        double sum_dangling_pr = 0;
+        -:  530:
+    #####:  531:        for (const string& node : nodes) {
+    #####:  532:            double inbound_pr_sum = 0;
+    #####:  533:            for (const string& neighbor : nodes) {
+    #####:  534:                if (graph.count(neighbor) && graph.at(neighbor).count(node)) {
+    #####:  535:                    inbound_pr_sum += pr[neighbor] / out_degree[neighbor];
+        -:  536:                }
+        -:  537:            }
+    #####:  538:            new_pr[node] = (1 - d) / N + d * inbound_pr_sum;
+    #####:  539:            if (out_degree[node] == 0) {
+    #####:  540:                sum_dangling_pr += pr[node];
+        -:  541:            }
+        -:  542:        }
+        -:  543:
+    #####:  544:        for (const string& node : nodes) {
+    #####:  545:            new_pr[node] += d * sum_dangling_pr / N;
+        -:  546:        }
+        -:  547:
+    #####:  548:        bool converged = true;
+    #####:  549:        for (const string& node : nodes) {
+    #####:  550:            if (abs(new_pr[node] - pr[node]) > tol) {
+    #####:  551:                converged = false;
+    #####:  552:                break;
+        -:  553:            }
+        -:  554:        }
+    #####:  555:        pr = new_pr;
+    #####:  556:        if (converged) {
+    #####:  557:            break;
+        -:  558:        }
+        -:  559:    }
+        -:  560:
+    #####:  561:    return pr.count(target_word) ? pr.at(target_word) : 0.0;
+        -:  562:}
+        -:  563:
+        -:  564:
+        -:  565:// Dijkstra算法变体，计算从起始单词到所有其他单词的最短路径
+    #####:  566:unordered_map<string, pair<int, string>> dijkstraFromWord(const string& start_word) {
+    #####:  567:    unordered_map<string, int> distances;
+    #####:  568:    unordered_map<string, string> previous_nodes;
+    #####:  569:    priority_queue<pair<int, string>, vector<pair<int, string>>, greater<pair<int, string>>> pq;
+        -:  570:
+        -:  571:    // 初始化所有节点的距离为无穷大，起始节点的距离为 0
+    #####:  572:    unordered_set<string> all_nodes;
+    #####:  573:    for (const auto& entry : graph) {
+    #####:  574:        all_nodes.insert(entry.first);
+    #####:  575:        for (const auto& neighbor : entry.second) {
+    #####:  576:            all_nodes.insert(neighbor.first);
+        -:  577:        }
+        -:  578:    }
+    #####:  579:    for (const string& node : all_nodes) {
+    #####:  580:        distances[node] = numeric_limits<int>::max();
+    #####:  581:        previous_nodes[node] = "";
+        -:  582:    }
+    #####:  583:    distances[start_word] = 0;
+    #####:  584:    pq.push({0, start_word});
+        -:  585:
+    #####:  586:    while (!pq.empty()) {
+    #####:  587:        int current_distance = pq.top().first;
+    #####:  588:        string current_word = pq.top().second;
+    #####:  589:        pq.pop();
+        -:  590:
+    #####:  591:        if (current_distance > distances[current_word]) {
+    #####:  592:            continue;
+        -:  593:        }
+        -:  594:
+    #####:  595:        if (graph.count(current_word)) {
+    #####:  596:            for (const auto& neighbor_pair : graph.at(current_word)) {
+    #####:  597:                string neighbor_word = neighbor_pair.first;
+    #####:  598:                int weight = neighbor_pair.second;
+    #####:  599:                int distance = current_distance + weight;
+    #####:  600:                if (distance < distances[neighbor_word]) {
+    #####:  601:                    distances[neighbor_word] = distance;
+    #####:  602:                    previous_nodes[neighbor_word] = current_word;
+    #####:  603:                    pq.push({distance, neighbor_word});
+        -:  604:                }
+        -:  605:            }
+        -:  606:        }
+        -:  607:    }
+        -:  608:
+    #####:  609:    unordered_map<string, pair<int, string>> results;
+    #####:  610:    for (const auto& node : all_nodes) {
+    #####:  611:        results[node] = {distances[node], previous_nodes[node]};
+        -:  612:    }
+    #####:  613:    return results;
+        -:  614:}
+        -:  615:
+        -:  616:// 根据前驱节点信息重建最短路径
+    #####:  617:vector<string> reconstructPath(const unordered_map<string, string>& previous_nodes, const string& target_word) {
+    #####:  618:    vector<string> path;
+    #####:  619:    string current = target_word;
+    #####:  620:    while (!current.empty()) {
+    #####:  621:        path.push_back(current);
+    #####:  622:        current = previous_nodes.at(current);
+        -:  623:    }
+    #####:  624:    reverse(path.begin(), path.end());
+    #####:  625:    return path;
+        -:  626:}
+        -:  627:
+        -:  628:// 计算并展示从给定单词到图中其他所有单词的最短路径
+    #####:  629:void showShortestPathsFromWord(const string& start_word) {
+    #####:  630:    unordered_map<string, pair<int, string>> dijkstra_results = dijkstraFromWord(start_word);
+    #####:  631:    unordered_map<string, int> distances;
+    #####:  632:    unordered_map<string, string> previous_nodes;
+    #####:  633:    unordered_set<string> all_nodes;
+        -:  634:
+    #####:  635:    for (const auto& result_pair : dijkstra_results) {
+    #####:  636:        all_nodes.insert(result_pair.first);
+    #####:  637:        distances[result_pair.first] = result_pair.second.first;
+    #####:  638:        previous_nodes[result_pair.first] = result_pair.second.second;
+        -:  639:    }
+        -:  640:
+    #####:  641:    cout << "Shortest paths from '" << start_word << "':" << endl;
+    #####:  642:    for (const string& target_word : all_nodes) {
+    #####:  643:        if (target_word == start_word) {
+    #####:  644:            continue;
+        -:  645:        }
+        -:  646:
+    #####:  647:        if (distances[target_word] == numeric_limits<int>::max()) {
+    #####:  648:            cout << "To '" << target_word << "': No path exists." << endl;
+        -:  649:        } else {
+    #####:  650:            vector<string> path = reconstructPath(previous_nodes, target_word);
+    #####:  651:            cout << "To '" << target_word << "' (Distance: " << distances[target_word] << "): ";
+    #####:  652:            for (size_t i = 0; i < path.size(); ++i) {
+    #####:  653:                cout << path[i] << (i == path.size() - 1 ? "" : " -> ");
+        -:  654:            }
+    #####:  655:            cout << endl;
+        -:  656:        }
+        -:  657:    }
+    #####:  658:}
+        -:  659:
+        -:  660:// 可选的默认 DOT 文件路径
+        -:  661:const std::string defaultDotPath = "text_graph.dot";
+        -:  662:// 可选的默认图像文件路径
+        -:  663:const std::string defaultImagePath = "text_graph.png";
+        -:  664:
+    #####:  665:bool exportGraphToDOT(const std::string& dotFilePath = "") {
+    #####:  666:    std::string filePath = dotFilePath.empty() ? defaultDotPath : dotFilePath;
+    #####:  667:    std::ofstream file(filePath);
+    #####:  668:    if (!file.is_open()) {
+    #####:  669:        std::cerr << "Unable to open DOT file: " << filePath << std::endl;
+    #####:  670:        return false;
+        -:  671:    }
+        -:  672:
+    #####:  673:    file << "digraph TextGraph {" << std::endl;
+    #####:  674:    file << "  node [shape=ellipse, style=filled, fillcolor=lightblue];" << std::endl;
+    #####:  675:    file << "  edge [color=gray];" << std::endl;
+        -:  676:
+        -:  677:    // Write vertices (unique words in the graph)
+    #####:  678:    std::unordered_set<std::string> vertices;
+    #####:  679:    for (const auto& entry : graph) {
+    #####:  680:        vertices.insert(entry.first);
+    #####:  681:        for (const auto& neighbor : entry.second) {
+    #####:  682:            vertices.insert(neighbor.first);
+        -:  683:        }
+        -:  684:    }
+    #####:  685:    for (const auto& vertex : vertices) {
+    #####:  686:        file << "  \"" << vertex << "\";" << std::endl;
+        -:  687:    }
+        -:  688:
+        -:  689:    // Write edges
+    #####:  690:    for (const auto& source_node : graph) {
+    #####:  691:        const std::string& source = source_node.first;
+    #####:  692:        for (const auto& target_node : source_node.second) {
+    #####:  693:            const std::string& target = target_node.first;
+    #####:  694:            int weight = target_node.second;
+        -:  695:            file << "  \"" << source << "\" -> \"" << target
+    #####:  696:                 << "\" [label=\"" << weight << "\", weight=" << weight << "];" << std::endl;
+        -:  697:        }
+        -:  698:    }
+        -:  699:
+    #####:  700:    file << "}" << std::endl;
+    #####:  701:    file.close();
+        -:  702:
+    #####:  703:    std::cout << "Graph exported to DOT file: " << filePath << std::endl;
+    #####:  704:    return true;
+        -:  705:}
+        -:  706:
+    #####:  707:bool generateGraphImage(const std::string& dotFilePath = "", const std::string& imageFilePath = "") {
+    #####:  708:    std::string dotPath = dotFilePath.empty() ? defaultDotPath : dotFilePath;
+    #####:  709:    std::string imgPath = imageFilePath.empty() ? defaultImagePath : imageFilePath;
+        -:  710:
+        -:  711:    // Run Graphviz command to convert .dot to image
+    #####:  712:    std::string command = "dot -Tpng \"" + dotPath + "\" -o \"" + imgPath + "\"";
+        -:  713:
+    #####:  714:    std::cout << "Executing command: " << command << std::endl;
+    #####:  715:    int result = std::system(command.c_str());
+        -:  716:
+    #####:  717:    if (result == 0) {
+    #####:  718:        std::cout << "Graph image saved at: " << imgPath << std::endl;
+    #####:  719:        return true;
+        -:  720:    } else {
+    #####:  721:        std::cerr << "Failed to generate graph image. Make sure Graphviz is installed and in the PATH." << std::endl;
+    #####:  722:        return false;
+        -:  723:    }
+        -:  724:}
+        -:  725:
+        -:  726:// 组合导出 DOT 文件和生成图像的函数
+    #####:  727:void visualizeGraph(const std::string& dotFilePath = "", const std::string& imageFilePath = "") {
+    #####:  728:    if (exportGraphToDOT(dotFilePath)) {
+    #####:  729:        generateGraphImage(dotFilePath, imageFilePath);
+        -:  730:    }
+    #####:  731:}
+    #####:  732:void extal_part(string text){
+    #####:  733:        cout << "\nSelect an option from the menu:" << endl;
+    #####:  734:        cout << "1. Display the directed graph" << endl;    
+    #####:  735:        cout << "2. Find all the shortest path for one word" << endl;
+    #####:  736:        cout << "3. Calculate PageRank for a word with TF-IDF" << endl;
+        -:  737:
+    #####:  738:        string choice;
+    #####:  739:        cout << "Enter the option number: ";
+    #####:  740:        getline(cin, choice);
+        -:  741:
+    #####:  742:        if (choice == "1") {
+    #####:  743:            visualizeGraph();
+    #####:  744:        }   else if (choice == "2") {
+    #####:  745:            string word1;
+    #####:  746:            cout << "Enter the  word: ";
+    #####:  747:            getline(cin, word1);
+    #####:  748:            showShortestPathsFromWord(word1);
+        -:  749:           
+    #####:  750:        } else if (choice == "3") {
+    #####:  751:            std::vector<std::string> all_documents;
+    #####:  752:            all_documents.push_back(text);
+    #####:  753:            string word;
+    #####:  754:            cout << "Enter the word for PageRank calculation: ";
+    #####:  755:            getline(cin, word);
+    #####:  756:            cout << "PageRank value of '" << word << "': " << fixed << setprecision(6) << calPageRankWithInitialWeighting(word, all_documents) << endl;
+        -:  757:        }  else {
+    #####:  758:            cout << "Invalid option. Please try again." << endl;
+        -:  759:        }
+        -:  760:
+    #####:  761:}
+        -:  762:
+        -:  763:
+    #####:  764:int main1(int argc, char* argv[]) {
+    #####:  765:    string filepath = "Easy text.txt";
+    #####:  766:    if (argc > 1) {
+    #####:  767:        filepath = argv[1];
+        -:  768:    }
+        -:  769:
+    #####:  770:    string text = read_file(filepath);
+    #####:  771:    build_directed_graph(text);
+        -:  772:
+        -:  773:    while (true) {
+        -:  774:        
+    #####:  775:        cout << "\nSelect an option from the menu:" << endl;
+    #####:  776:        cout << "1. Display the directed graph" << endl;
+    #####:  777:        cout << "2. Find the bridge words between two nodes" << endl;
+    #####:  778:        cout << "3. Generate new text based on bridge words" << endl;
+    #####:  779:        cout << "4. Find the shortest path between two nodes" << endl;
+    #####:  780:        cout << "5. Calculate PageRank for a word" << endl;
+    #####:  781:        cout << "6. Perform a random walk" << endl;
+    #####:  782:        cout << "7. Extal Part" << endl;
+    #####:  783:        cout << "8. Exit" << endl;
+        -:  784:
+    #####:  785:        string choice;
+    #####:  786:        cout << "Enter the option number: ";
+    #####:  787:        getline(cin, choice);
+        -:  788:
+    #####:  789:        if (choice == "1") {
+    #####:  790:            showDirectedGraph(graph);
+    #####:  791:        } else if (choice == "2") {
+    #####:  792:            string word1, word2;
+    #####:  793:            cout << "Enter the first word: ";
+    #####:  794:            getline(cin, word1);
+    #####:  795:            cout << "Enter the second word: ";
+    #####:  796:            getline(cin, word2);
+    #####:  797:            queryBridgeWords(word1, word2);
+    #####:  798:        } else if (choice == "3") {
+    #####:  799:            string new_text;
+    #####:  800:            cout << "Enter the text: ";
+    #####:  801:            getline(cin, new_text);
+    #####:  802:            cout << "Generated text: " << generateNewText(new_text) << endl;
+    #####:  803:        } else if (choice == "4") {
+    #####:  804:            string word1, word2;
+    #####:  805:            cout << "Enter the first word: ";
+    #####:  806:            getline(cin, word1);
+    #####:  807:            cout << "Enter the second word: ";
+    #####:  808:            getline(cin, word2);
+    #####:  809:            calcShortestPath(word1, word2);
+    #####:  810:        } else if (choice == "5") {
+    #####:  811:            string word;
+    #####:  812:            cout << "Enter the word for PageRank calculation: ";
+    #####:  813:            getline(cin, word);
+    #####:  814:            cout << "PageRank value of '" << word << "': " << fixed << setprecision(6) << calPageRank(word) << endl;
+    #####:  815:        } else if (choice == "6") {
+    #####:  816:            randomWalk();
+    #####:  817:        } else if(choice == "7") {
+        -:  818:
+    #####:  819:            extal_part(text);
+        -:  820:            
+    #####:  821:        }else if(choice == "8") {
+    #####:  822:            cout << "Exiting the program." << endl;
+    #####:  823:            break;
+        -:  824:        } else {
+    #####:  825:            cout << "Invalid option. Please try again." << endl;
+        -:  826:        }
+    #####:  827:    }
+        -:  828:
+    #####:  829:    return 0;
+        -:  830:}

@@ -1,0 +1,377 @@
+        -:    0:Source:C:/mingw64/lib/gcc/x86_64-w64-mingw32/8.1.0/include/c++/bits/uniform_int_dist.h
+        -:    0:Graph:.\graph_analyzer.cpp.gcno
+        -:    0:Data:.\graph_analyzer.cpp.gcda
+        -:    0:Runs:6
+        -:    0:Programs:1
+        -:    1:// Class template uniform_int_distribution -*- C++ -*-
+        -:    2:
+        -:    3:// Copyright (C) 2009-2018 Free Software Foundation, Inc.
+        -:    4://
+        -:    5:// This file is part of the GNU ISO C++ Library.  This library is free
+        -:    6:// software; you can redistribute it and/or modify it under the
+        -:    7:// terms of the GNU General Public License as published by the
+        -:    8:// Free Software Foundation; either version 3, or (at your option)
+        -:    9:// any later version.
+        -:   10:
+        -:   11:// This library is distributed in the hope that it will be useful,
+        -:   12:// but WITHOUT ANY WARRANTY; without even the implied warranty of
+        -:   13:// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        -:   14:// GNU General Public License for more details.
+        -:   15:
+        -:   16:// Under Section 7 of GPL version 3, you are granted additional
+        -:   17:// permissions described in the GCC Runtime Library Exception, version
+        -:   18:// 3.1, as published by the Free Software Foundation.
+        -:   19:
+        -:   20:// You should have received a copy of the GNU General Public License and
+        -:   21:// a copy of the GCC Runtime Library Exception along with this program;
+        -:   22:// see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
+        -:   23:// <http://www.gnu.org/licenses/>.
+        -:   24:
+        -:   25:/**
+        -:   26: * @file bits/uniform_int_dist.h
+        -:   27: *  This is an internal header file, included by other library headers.
+        -:   28: *  Do not attempt to use it directly. @headername{random}
+        -:   29: */
+        -:   30:
+        -:   31:#ifndef _GLIBCXX_BITS_UNIFORM_INT_DIST_H
+        -:   32:#define _GLIBCXX_BITS_UNIFORM_INT_DIST_H
+        -:   33:
+        -:   34:#include <type_traits>
+        -:   35:#include <limits>
+        -:   36:
+        -:   37:namespace std _GLIBCXX_VISIBILITY(default)
+        -:   38:{
+        -:   39:_GLIBCXX_BEGIN_NAMESPACE_VERSION
+        -:   40:
+        -:   41:  namespace __detail
+        -:   42:  {
+        -:   43:    /* Determine whether number is a power of 2.  */
+        -:   44:    template<typename _Tp>
+        -:   45:      inline bool
+        -:   46:      _Power_of_2(_Tp __x)
+        -:   47:      {
+        -:   48:	return ((__x - 1) & __x) == 0;
+        -:   49:      }
+        -:   50:  }
+        -:   51:
+        -:   52:  /**
+        -:   53:   * @brief Uniform discrete distribution for random numbers.
+        -:   54:   * A discrete random distribution on the range @f$[min, max]@f$ with equal
+        -:   55:   * probability throughout the range.
+        -:   56:   */
+        -:   57:  template<typename _IntType = int>
+        -:   58:    class uniform_int_distribution
+        -:   59:    {
+        -:   60:      static_assert(std::is_integral<_IntType>::value,
+        -:   61:		    "template argument must be an integral type");
+        -:   62:
+        -:   63:    public:
+        -:   64:      /** The type of the range of the distribution. */
+        -:   65:      typedef _IntType result_type;
+        -:   66:      /** Parameter type. */
+        -:   67:      struct param_type
+        -:   68:      {
+        -:   69:	typedef uniform_int_distribution<_IntType> distribution_type;
+        -:   70:
+        -:   71:	explicit
+    #####:   72:	param_type(_IntType __a = 0,
+        -:   73:		   _IntType __b = std::numeric_limits<_IntType>::max())
+    #####:   74:	: _M_a(__a), _M_b(__b)
+        -:   75:	{
+        -:   76:	  __glibcxx_assert(_M_a <= _M_b);
+    #####:   77:	}
+        -:   78:
+        -:   79:	result_type
+    #####:   80:	a() const
+    #####:   81:	{ return _M_a; }
+        -:   82:
+        -:   83:	result_type
+    #####:   84:	b() const
+    #####:   85:	{ return _M_b; }
+        -:   86:
+        -:   87:	friend bool
+        -:   88:	operator==(const param_type& __p1, const param_type& __p2)
+        -:   89:	{ return __p1._M_a == __p2._M_a && __p1._M_b == __p2._M_b; }
+        -:   90:
+        -:   91:	friend bool
+        -:   92:	operator!=(const param_type& __p1, const param_type& __p2)
+        -:   93:	{ return !(__p1 == __p2); }
+        -:   94:
+        -:   95:      private:
+        -:   96:	_IntType _M_a;
+        -:   97:	_IntType _M_b;
+        -:   98:      };
+        -:   99:
+        -:  100:    public:
+        -:  101:      /**
+        -:  102:       * @brief Constructs a uniform distribution object.
+        -:  103:       */
+        -:  104:      explicit
+    #####:  105:      uniform_int_distribution(_IntType __a = 0,
+        -:  106:			   _IntType __b = std::numeric_limits<_IntType>::max())
+    #####:  107:      : _M_param(__a, __b)
+    #####:  108:      { }
+        -:  109:
+        -:  110:      explicit
+        -:  111:      uniform_int_distribution(const param_type& __p)
+        -:  112:      : _M_param(__p)
+        -:  113:      { }
+        -:  114:
+        -:  115:      /**
+        -:  116:       * @brief Resets the distribution state.
+        -:  117:       *
+        -:  118:       * Does nothing for the uniform integer distribution.
+        -:  119:       */
+        -:  120:      void
+        -:  121:      reset() { }
+        -:  122:
+        -:  123:      result_type
+        -:  124:      a() const
+        -:  125:      { return _M_param.a(); }
+        -:  126:
+        -:  127:      result_type
+        -:  128:      b() const
+        -:  129:      { return _M_param.b(); }
+        -:  130:
+        -:  131:      /**
+        -:  132:       * @brief Returns the parameter set of the distribution.
+        -:  133:       */
+        -:  134:      param_type
+        -:  135:      param() const
+        -:  136:      { return _M_param; }
+        -:  137:
+        -:  138:      /**
+        -:  139:       * @brief Sets the parameter set of the distribution.
+        -:  140:       * @param __param The new parameter set of the distribution.
+        -:  141:       */
+        -:  142:      void
+        -:  143:      param(const param_type& __param)
+        -:  144:      { _M_param = __param; }
+        -:  145:
+        -:  146:      /**
+        -:  147:       * @brief Returns the inclusive lower bound of the distribution range.
+        -:  148:       */
+        -:  149:      result_type
+        -:  150:      min() const
+        -:  151:      { return this->a(); }
+        -:  152:
+        -:  153:      /**
+        -:  154:       * @brief Returns the inclusive upper bound of the distribution range.
+        -:  155:       */
+        -:  156:      result_type
+        -:  157:      max() const
+        -:  158:      { return this->b(); }
+        -:  159:
+        -:  160:      /**
+        -:  161:       * @brief Generating functions.
+        -:  162:       */
+        -:  163:      template<typename _UniformRandomNumberGenerator>
+        -:  164:	result_type
+    #####:  165:	operator()(_UniformRandomNumberGenerator& __urng)
+    #####:  166:        { return this->operator()(__urng, _M_param); }
+        -:  167:
+        -:  168:      template<typename _UniformRandomNumberGenerator>
+        -:  169:	result_type
+        -:  170:	operator()(_UniformRandomNumberGenerator& __urng,
+        -:  171:		   const param_type& __p);
+        -:  172:
+        -:  173:      template<typename _ForwardIterator,
+        -:  174:	       typename _UniformRandomNumberGenerator>
+        -:  175:	void
+        -:  176:	__generate(_ForwardIterator __f, _ForwardIterator __t,
+        -:  177:		   _UniformRandomNumberGenerator& __urng)
+        -:  178:	{ this->__generate(__f, __t, __urng, _M_param); }
+        -:  179:
+        -:  180:      template<typename _ForwardIterator,
+        -:  181:	       typename _UniformRandomNumberGenerator>
+        -:  182:	void
+        -:  183:	__generate(_ForwardIterator __f, _ForwardIterator __t,
+        -:  184:		   _UniformRandomNumberGenerator& __urng,
+        -:  185:		   const param_type& __p)
+        -:  186:	{ this->__generate_impl(__f, __t, __urng, __p); }
+        -:  187:
+        -:  188:      template<typename _UniformRandomNumberGenerator>
+        -:  189:	void
+        -:  190:	__generate(result_type* __f, result_type* __t,
+        -:  191:		   _UniformRandomNumberGenerator& __urng,
+        -:  192:		   const param_type& __p)
+        -:  193:	{ this->__generate_impl(__f, __t, __urng, __p); }
+        -:  194:
+        -:  195:      /**
+        -:  196:       * @brief Return true if two uniform integer distributions have
+        -:  197:       *        the same parameters.
+        -:  198:       */
+        -:  199:      friend bool
+        -:  200:      operator==(const uniform_int_distribution& __d1,
+        -:  201:		 const uniform_int_distribution& __d2)
+        -:  202:      { return __d1._M_param == __d2._M_param; }
+        -:  203:
+        -:  204:    private:
+        -:  205:      template<typename _ForwardIterator,
+        -:  206:	       typename _UniformRandomNumberGenerator>
+        -:  207:	void
+        -:  208:	__generate_impl(_ForwardIterator __f, _ForwardIterator __t,
+        -:  209:			_UniformRandomNumberGenerator& __urng,
+        -:  210:			const param_type& __p);
+        -:  211:
+        -:  212:      param_type _M_param;
+        -:  213:    };
+        -:  214:
+        -:  215:  template<typename _IntType>
+        -:  216:    template<typename _UniformRandomNumberGenerator>
+        -:  217:      typename uniform_int_distribution<_IntType>::result_type
+    #####:  218:      uniform_int_distribution<_IntType>::
+        -:  219:      operator()(_UniformRandomNumberGenerator& __urng,
+        -:  220:		 const param_type& __param)
+        -:  221:      {
+        -:  222:	typedef typename _UniformRandomNumberGenerator::result_type
+        -:  223:	  _Gresult_type;
+        -:  224:	typedef typename std::make_unsigned<result_type>::type __utype;
+        -:  225:	typedef typename std::common_type<_Gresult_type, __utype>::type
+        -:  226:	  __uctype;
+        -:  227:
+    #####:  228:	const __uctype __urngmin = __urng.min();
+    #####:  229:	const __uctype __urngmax = __urng.max();
+    #####:  230:	const __uctype __urngrange = __urngmax - __urngmin;
+    #####:  231:	const __uctype __urange
+    #####:  232:	  = __uctype(__param.b()) - __uctype(__param.a());
+        -:  233:
+        -:  234:	__uctype __ret;
+        -:  235:
+    #####:  236:	if (__urngrange > __urange)
+        -:  237:	  {
+        -:  238:	    // downscaling
+    #####:  239:	    const __uctype __uerange = __urange + 1; // __urange can be zero
+    #####:  240:	    const __uctype __scaling = __urngrange / __uerange;
+    #####:  241:	    const __uctype __past = __uerange * __scaling;
+    #####:  242:	    do
+    #####:  243:	      __ret = __uctype(__urng()) - __urngmin;
+    #####:  244:	    while (__ret >= __past);
+    #####:  245:	    __ret /= __scaling;
+        -:  246:	  }
+        -:  247:	else if (__urngrange < __urange)
+        -:  248:	  {
+        -:  249:	    // upscaling
+        -:  250:	    /*
+        -:  251:	      Note that every value in [0, urange]
+        -:  252:	      can be written uniquely as
+        -:  253:
+        -:  254:	      (urngrange + 1) * high + low
+        -:  255:
+        -:  256:	      where
+        -:  257:
+        -:  258:	      high in [0, urange / (urngrange + 1)]
+        -:  259:
+        -:  260:	      and
+        -:  261:
+        -:  262:	      low in [0, urngrange].
+        -:  263:	    */
+        -:  264:	    __uctype __tmp; // wraparound control
+        -:  265:	    do
+        -:  266:	      {
+        -:  267:		const __uctype __uerngrange = __urngrange + 1;
+        -:  268:		__tmp = (__uerngrange * operator()
+        -:  269:			 (__urng, param_type(0, __urange / __uerngrange)));
+        -:  270:		__ret = __tmp + (__uctype(__urng()) - __urngmin);
+        -:  271:	      }
+        -:  272:	    while (__ret > __urange || __ret < __tmp);
+        -:  273:	  }
+        -:  274:	else
+    #####:  275:	  __ret = __uctype(__urng()) - __urngmin;
+        -:  276:
+    #####:  277:	return __ret + __param.a();
+        -:  278:      }
+        -:  279:
+        -:  280:
+        -:  281:  template<typename _IntType>
+        -:  282:    template<typename _ForwardIterator,
+        -:  283:	     typename _UniformRandomNumberGenerator>
+        -:  284:      void
+        -:  285:      uniform_int_distribution<_IntType>::
+        -:  286:      __generate_impl(_ForwardIterator __f, _ForwardIterator __t,
+        -:  287:		      _UniformRandomNumberGenerator& __urng,
+        -:  288:		      const param_type& __param)
+        -:  289:      {
+        -:  290:	__glibcxx_function_requires(_ForwardIteratorConcept<_ForwardIterator>)
+        -:  291:	typedef typename _UniformRandomNumberGenerator::result_type
+        -:  292:	  _Gresult_type;
+        -:  293:	typedef typename std::make_unsigned<result_type>::type __utype;
+        -:  294:	typedef typename std::common_type<_Gresult_type, __utype>::type
+        -:  295:	  __uctype;
+        -:  296:
+        -:  297:	const __uctype __urngmin = __urng.min();
+        -:  298:	const __uctype __urngmax = __urng.max();
+        -:  299:	const __uctype __urngrange = __urngmax - __urngmin;
+        -:  300:	const __uctype __urange
+        -:  301:	  = __uctype(__param.b()) - __uctype(__param.a());
+        -:  302:
+        -:  303:	__uctype __ret;
+        -:  304:
+        -:  305:	if (__urngrange > __urange)
+        -:  306:	  {
+        -:  307:	    if (__detail::_Power_of_2(__urngrange + 1)
+        -:  308:		&& __detail::_Power_of_2(__urange + 1))
+        -:  309:	      {
+        -:  310:		while (__f != __t)
+        -:  311:		  {
+        -:  312:		    __ret = __uctype(__urng()) - __urngmin;
+        -:  313:		    *__f++ = (__ret & __urange) + __param.a();
+        -:  314:		  }
+        -:  315:	      }
+        -:  316:	    else
+        -:  317:	      {
+        -:  318:		// downscaling
+        -:  319:		const __uctype __uerange = __urange + 1; // __urange can be zero
+        -:  320:		const __uctype __scaling = __urngrange / __uerange;
+        -:  321:		const __uctype __past = __uerange * __scaling;
+        -:  322:		while (__f != __t)
+        -:  323:		  {
+        -:  324:		    do
+        -:  325:		      __ret = __uctype(__urng()) - __urngmin;
+        -:  326:		    while (__ret >= __past);
+        -:  327:		    *__f++ = __ret / __scaling + __param.a();
+        -:  328:		  }
+        -:  329:	      }
+        -:  330:	  }
+        -:  331:	else if (__urngrange < __urange)
+        -:  332:	  {
+        -:  333:	    // upscaling
+        -:  334:	    /*
+        -:  335:	      Note that every value in [0, urange]
+        -:  336:	      can be written uniquely as
+        -:  337:
+        -:  338:	      (urngrange + 1) * high + low
+        -:  339:
+        -:  340:	      where
+        -:  341:
+        -:  342:	      high in [0, urange / (urngrange + 1)]
+        -:  343:
+        -:  344:	      and
+        -:  345:
+        -:  346:	      low in [0, urngrange].
+        -:  347:	    */
+        -:  348:	    __uctype __tmp; // wraparound control
+        -:  349:	    while (__f != __t)
+        -:  350:	      {
+        -:  351:		do
+        -:  352:		  {
+        -:  353:		    const __uctype __uerngrange = __urngrange + 1;
+        -:  354:		    __tmp = (__uerngrange * operator()
+        -:  355:			     (__urng, param_type(0, __urange / __uerngrange)));
+        -:  356:		    __ret = __tmp + (__uctype(__urng()) - __urngmin);
+        -:  357:		  }
+        -:  358:		while (__ret > __urange || __ret < __tmp);
+        -:  359:		*__f++ = __ret;
+        -:  360:	      }
+        -:  361:	  }
+        -:  362:	else
+        -:  363:	  while (__f != __t)
+        -:  364:	    *__f++ = __uctype(__urng()) - __urngmin + __param.a();
+        -:  365:      }
+        -:  366:
+        -:  367:  // operator!= and operator<< and operator>> are defined in <bits/random.h>
+        -:  368:
+        -:  369:_GLIBCXX_END_NAMESPACE_VERSION
+        -:  370:} // namespace std
+        -:  371:
+        -:  372:#endif
